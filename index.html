@@ -79,7 +79,7 @@ input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(35
 <input type="text" id="expenseEntity" placeholder="مثلاً: العون المباشر، بيت الزكاة">
 <label>المشروع (اختياري)</label>
 <input type="text" id="expenseProject" placeholder="مثلاً: كفالة يتيم، بئر ماء">
-<button class="btn btn-mint" id="btnAddExpense">خصم وتسجيل الصدقة</button>
+<button type="button" class="btn btn-mint" onclick="doAddExpense()">خصم وتسجيل الصدقة</button>
 </div>
 
 <div class="card">
@@ -96,13 +96,13 @@ input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(35
 <input type="text" inputmode="decimal" id="newBudgetAmount" placeholder="0.000">
 <label>تاريخ بداية الدورة</label>
 <input type="date" id="newStartDate">
-<button class="btn btn-mint" id="btnStartCycle">اعتماد الدورة الجديدة</button>
-<button class="btn btn-danger-outline" id="btnResetAll">تصفير كافة البيانات والأرشيف</button>
+<button type="button" class="btn btn-mint" onclick="doStartCycle()">اعتماد الدورة الجديدة</button>
+<button type="button" class="btn btn-danger-outline" onclick="doResetAll()">تصفير كافة البيانات والأرشيف</button>
 </div>
 </div>
 
 <div id="tab-stats" class="tab-section">
-<button class="btn btn-mint no-print" id="btnExportPDF" style="margin-bottom:16px">تصدير تقرير الإحصائيات (PDF)</button>
+<button type="button" class="btn btn-mint no-print" onclick="doExportPDF()" style="margin-bottom:16px">تصدير تقرير الإحصائيات (PDF)</button>
 <div class="card">
 <div class="card-header"><span>ملخص الإحصائيات العام</span></div>
 <div class="stats-grid">
@@ -118,12 +118,11 @@ input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(35
 </div>
 
 <nav class="bottom-nav no-print">
-<button class="nav-item active" data-tab="donate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg><span>إخراج صدقة</span></button>
-<button class="nav-item" data-tab="cycle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg><span>دورة جديدة</span></button>
-<button class="nav-item" data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>الإحصائيات</span></button>
+<button type="button" class="nav-item active" id="nav-donate" onclick="doSwitchTab('donate')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg><span>إخراج صدقة</span></button>
+<button type="button" class="nav-item" id="nav-cycle" onclick="doSwitchTab('cycle')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg><span>دورة جديدة</span></button>
+<button type="button" class="nav-item" id="nav-stats" onclick="doSwitchTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>الإحصائيات</span></button>
 </nav>
 
-<script>
-if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>{for(let reg of r)reg.unregister()})}
-
-function getTodayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+<script src="app.js"></script>
+</body>
+</html>
