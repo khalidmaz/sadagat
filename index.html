@@ -8,7 +8,8 @@
   <meta name="theme-color" content="#232A34" />
   <title>مِيزَان الصَّدَقَات | KWD</title>
   <link rel="icon" type="image/png" href="icon.png" />
-  <  <link rel="manifest" href="manifest.json" />>
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://googleapis.com" />
   <link rel="preconnect" href="https://gstatic.com" crossorigin />
   <link href="https://googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
@@ -50,6 +51,7 @@
       padding-bottom: 92px;
       overflow-x: hidden;
     }
+
     .app-header {
       display: flex;
       align-items: center;
@@ -108,6 +110,7 @@
       width: 100%;
       overflow: hidden;
     }
+
     .card-title {
       font-size: 1.05rem;
       font-weight: 800;
@@ -178,6 +181,9 @@
       min-height: 46px;
       text-align: right;
     }
+
+
+
     input:focus, select:focus {
       border-color: var(--bg-dark);
       background-color: #FFFFFF;
@@ -244,6 +250,7 @@
       color: #0D8A5E;
       direction: ltr;
     }
+
     .icon-btn {
       background: rgba(217, 72, 72, 0.12);
       color: var(--danger);
@@ -328,15 +335,59 @@
       font-size: 0.88rem;
       padding: 14px 0;
     }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 20, 26, 0.78);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 2000;
+    }
+    .modal-overlay.show {
+      display: flex;
+      animation: fadeIn 0.18s ease;
+    }
+    .modal-box {
+      background: var(--card-ivory);
+      color: var(--text-dark);
+      width: 100%;
+      max-width: 380px;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+      border: 1.5px solid var(--accent-mint);
+    }
+    .modal-title {
+      font-size: 1.08rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--bg-dark);
+    }
+    .modal-msg {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: var(--text-dark);
+      margin-bottom: 18px;
+      white-space: pre-line;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
     @media print {
       body { background: #FFFFFF !important; color: #000000 !important; padding: 0 !important; }
-      .bottom-nav, .no-print, .icon-btn { display: none !important; }
+      .bottom-nav, .no-print, .icon-btn, .modal-overlay { display: none !important; }
       .tab-section { display: none !important; }
       #tab-stats { display: block !important; }
       .card { box-shadow: none !important; border: 1px solid #CCCCCC !important; break-inside: avoid; }
     }
   </style>
 </head>
+
 <body>
   <header class="app-header">
     <div class="brand">
@@ -396,6 +447,7 @@
         <div id="current-tx-list"></div>
       </div>
     </section>
+
     <section id="tab-cycle" class="tab-section">
       <div class="card">
         <div class="card-title">
@@ -455,7 +507,8 @@
       </div>
     </section>
   </main>
-  <nav class="bottom-nav no-print">
+
+    <nav class="bottom-nav no-print">
     <button type="button" class="nav-btn active" data-target="tab-donate">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       <span>إخراج صدقة</span>
@@ -469,6 +522,16 @@
       <span>الإحصائيات</span>
     </button>
   </nav>
+  <div id="custom-modal" class="modal-overlay no-print">
+    <div class="modal-box">
+      <div class="modal-title" id="modal-title">تنبيه</div>
+      <div class="modal-msg" id="modal-msg"></div>
+      <div class="modal-actions">
+        <button type="button" id="modal-confirm-btn" class="btn btn-primary">موافق</button>
+        <button type="button" id="modal-cancel-btn" class="btn btn-dark">إلغاء</button>
+      </div>
+    </div>
+  </div>
   <script>
     const STORAGE_KEY = 'sadaqah_kwd_app_v1';
     function getTodayISO() {
@@ -508,18 +571,23 @@
       if (months > 0) return `${months} شهر`;
       return `${days} يوم`;
     }
+
     function getCurrentSpent() {
       return state.currentCycle.transactions.reduce((sum, t) => sum + t.amount, 0);
     }
     function getCurrentRemaining() {
-      return Math.max(0, state.currentCycle.budget - getCurrentSpent());
+      return state.currentCycle.budget - getCurrentSpent();
     }
     function renderAll() {
       const remaining = getCurrentRemaining();
-      document.getElementById('disp-remaining').textContent = formatKWD(remaining);
+      const remEl = document.getElementById('disp-remaining');
+      remEl.textContent = formatKWD(remaining);
+      remEl.style.color = remaining < 0 ? 'var(--danger)' : '#0D8A5E';
       document.getElementById('disp-budget').textContent = formatKWD(state.currentCycle.budget);
       document.getElementById('disp-duration').textContent = calcDurationText(state.currentCycle.startDate);
-      document.getElementById('carry-preview').textContent = formatKWD(remaining);
+      const carryEl = document.getElementById('carry-preview');
+      carryEl.textContent = formatKWD(remaining);
+      carryEl.style.color = remaining < 0 ? 'var(--danger)' : 'inherit';
       const txContainer = document.getElementById('current-tx-list');
       if (state.currentCycle.transactions.length === 0) {
         txContainer.innerHTML = '<div class="empty-msg">لا توجد صدقات مسجلة في هذه الدورة بعد.</div>';
@@ -580,7 +648,8 @@
           return `<div class="charity-detail-box"><div style="display:flex; justify-content:space-between; font-weight:800; font-size:0.95rem;"><span>${name}</span><span style="direction:ltr; color:#0D8A5E;">${formatKWD(data.total)} KWD</span></div>${projLines}</div>`;
         }).join('');
       }
-      const archiveEl = document.getElementById('archive-list');
+
+            const archiveEl = document.getElementById('archive-list');
       if (state.archive.length === 0) {
         archiveEl.innerHTML = '<div class="empty-msg">لا توجد دورات سابقة مؤرشفة.</div>';
       } else {
@@ -590,60 +659,79 @@
         }).join('');
       }
     }
-    window.deleteTx = function(id) {
-      if (!confirm('هل تريد حذف هذه الصدقة؟')) return;
+    function showPopup(title, msg, isConfirm = false, isDanger = false) {
+      return new Promise(resolve => {
+        const overlay = document.getElementById('custom-modal');
+        const okBtn = document.getElementById('modal-confirm-btn');
+        const cancelBtn = document.getElementById('modal-cancel-btn');
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-msg').textContent = msg;
+        okBtn.style.backgroundColor = isDanger ? 'var(--danger)' : 'var(--accent-mint)';
+        okBtn.style.color = isDanger ? '#FFFFFF' : 'var(--bg-dark)';
+        okBtn.textContent = isConfirm ? 'تأكيد' : 'حسناً';
+        cancelBtn.style.display = isConfirm ? 'inline-flex' : 'none';
+        overlay.classList.add('show');
+        const cleanup = (result) => {
+          overlay.classList.remove('show');
+          okBtn.onclick = null;
+          cancelBtn.onclick = null;
+          resolve(result);
+        };
+        okBtn.onclick = () => cleanup(true);
+        cancelBtn.onclick = () => cleanup(false);
+      });
+    }
+    window.deleteTx = async function(id) {
+      const ok = await showPopup('حذف العملية', 'هل تريد حذف هذه الصدقة من السجل؟', true, true);
+      if (!ok) return;
       state.currentCycle.transactions = state.currentCycle.transactions.filter(t => t.id !== id);
       saveState();
       renderAll();
     };
-    document.getElementById('donate-form').addEventListener('submit', function(e) {
+    document.getElementById('donate-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const amount = parseArabicNumber(document.getElementById('inp-amount').value);
       const charity = document.getElementById('inp-charity').value.trim();
       const project = document.getElementById('inp-project').value.trim();
-      if (isNaN(amount) || amount <= 0) { alert('يرجى إدخال مبلغ صحيح أكبر من الصفر.'); return; }
+      if (isNaN(amount) || amount <= 0) { await showPopup('تنبيه', 'يرجى إدخال مبلغ صحيح أكبر من الصفر.'); return; }
       if (!charity || !project) return;
-      state.currentCycle.transactions.push({
-        id: Date.now().toString(36),
-        amount: amount,
-        charity: charity,
-        project: project,
-        date: getTodayISO()
-      });
+      const currentRem = getCurrentRemaining();
+      if (amount > currentRem) {
+        const excess = amount - Math.max(0, currentRem);
+        const ok = await showPopup('تجاوز الرصيد المتاح', `هذا المبلغ يتجاوز الرصيد المتبقي بمقدار ${formatKWD(excess)} KWD.\nهل تريد تسجيل الصدقة وخصم الزيادة من الدورة القادمة؟`, true, false);
+        if (!ok) return;
+      }
+      state.currentCycle.transactions.push({ id: Date.now().toString(36), amount, charity, project, date: getTodayISO() });
       saveState();
       this.reset();
       renderAll();
     });
-    document.getElementById('cycle-form').addEventListener('submit', function(e) {
+    document.getElementById('cycle-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const newAmt = parseArabicNumber(document.getElementById('cycle-amount').value);
       const startDate = document.getElementById('cycle-date').value || getTodayISO();
-      if (isNaN(newAmt) || newAmt < 0) { alert('يرجى إدخال مبلغ صحيح.'); return; }
+      if (isNaN(newAmt) || newAmt < 0) { await showPopup('تنبيه', 'يرجى إدخال مبلغ صحيح.'); return; }
       const carriedOver = getCurrentRemaining();
+      const finalBudget = Math.max(0, newAmt + carriedOver);
       if (state.currentCycle.budget > 0 || state.currentCycle.transactions.length > 0) {
         state.archive.push({ ...state.currentCycle, endDate: getTodayISO() });
       }
-      state.currentCycle = {
-        budget: newAmt + carriedOver,
-        startDate: startDate,
-        transactions: []
-      };
+      state.currentCycle = { budget: finalBudget, startDate, transactions: [] };
       saveState();
       this.reset();
       document.getElementById('cycle-date').value = getTodayISO();
       renderAll();
-      alert('تم بدء الدورة الجديدة بنجاح.');
+      await showPopup('تم اعتماد الدورة', `تم بدء الدورة الجديدة بصافي ميزانية: ${formatKWD(finalBudget)} KWD`);
     });
-    document.getElementById('btn-reset-all').addEventListener('click', function() {
-      if (!confirm('تحذير: سيتم مسح جميع البيانات والأرشيف نهائياً. هل أنت متأكد؟')) return;
+    document.getElementById('btn-reset-all').addEventListener('click', async function() {
+      const ok = await showPopup('تصفير كافة البيانات', 'تحذير: سيتم مسح جميع العمليات والأرشيف نهائياً. هل أنت متأكد؟', true, true);
+      if (!ok) return;
       localStorage.removeItem(STORAGE_KEY);
       state = { currentCycle: { budget: 0, startDate: getTodayISO(), transactions: [] }, archive: [] };
       saveState();
       renderAll();
     });
-    document.getElementById('btn-print-pdf').addEventListener('click', function() {
-      setTimeout(() => { window.print(); }, 150);
-    });
+    document.getElementById('btn-print-pdf').addEventListener('click', function() { setTimeout(() => { window.print(); }, 150); });
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
