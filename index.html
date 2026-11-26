@@ -325,7 +325,7 @@
         const amt = parseFloat(document.getElementById('expenseAmount').value);
         const entity = document.getElementById('expenseEntity').value.trim() || 'جهة عامة';
         const project = document.getElementById('expenseProject').value.trim() || 'صدقة عامة';
-        if (!amt || amt  e.id !== id);
+const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toISOString().split('T');
         saveData();
     }
 
