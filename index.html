@@ -488,7 +488,7 @@
       return `${days} يوم`;
     }
 
-    function getCurrentSpent() {
+        function getCurrentSpent() {
       return state.currentCycle.transactions.reduce((sum, t) => sum + t.amount, 0);
     }
     function getCurrentRemaining() {
@@ -565,16 +565,62 @@
         }).join('');
       }
 
-            const archiveEl = document.getElementById('archive-list');
+                  const archiveEl = document.getElementById('archive-list');
+      const toolbarEl = document.getElementById('archive-toolbar');
       if (state.archive.length === 0) {
+        toolbarEl.style.display = 'none';
         archiveEl.innerHTML = '<div class="empty-msg">لا توجد دورات سابقة مؤرشفة.</div>';
       } else {
-        archiveEl.innerHTML = state.archive.slice().reverse().map((c, idx) => {
+        toolbarEl.style.display = 'flex';
+        archiveEl.innerHTML = state.archive.map((c, idx) => ({ c, idx })).reverse().map(({ c, idx }) => {
           const spent = c.transactions.reduce((s, t) => s + t.amount, 0);
-          return `<div class="charity-detail-box"><div style="display:flex; justify-content:space-between; font-weight:800; font-size:0.9rem;"><span>دورة #${(state.archive.length - idx).toLocaleString('en-US')}</span><span style="direction:ltr;">${c.startDate} → ${c.endDate}</span></div><div style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">الميزانية: <strong style="direction:ltr; display:inline-block;">${formatKWD(c.budget)}</strong> | المصروف: <strong style="direction:ltr; display:inline-block;">${formatKWD(spent)}</strong> د.ك</div></div>`;
+          return `<div class="charity-detail-box"><div style="display:flex; align-items:center; justify-content:space-between; gap:8px;"><label style="display:flex; align-items:center; gap:8px; margin:0; cursor:pointer;"><input type="checkbox" class="arch-check" value="${idx}" /><span>دورة #${(idx + 1).toLocaleString('en-US')}</span></label><span style="direction:ltr; font-size:0.82rem; font-weight:700;">${c.startDate} → ${c.endDate}</span></div><div style="font-size:0.82rem; color:var(--text-muted); margin:6px 0 8px;">الميزانية: <strong style="direction:ltr; display:inline-block;">${formatKWD(c.budget)}</strong> | المصروف: <strong style="direction:ltr; display:inline-block;">${formatKWD(spent)}</strong> KWD</div><div style="display:flex; gap:8px;"><button type="button" class="btn btn-dark btn-sm" onclick="viewArchiveDetails(${idx})">عرض التفاصيل</button><button type="button" class="btn btn-primary btn-sm" onclick="printArchiveIndices([${idx}])">تصدير PDF</button><button type="button" class="icon-btn" onclick="deleteSingleArchive(${idx})" title="حذف"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></div>`;
         }).join('');
       }
     }
+    function buildArchiveReportHTML(indices) {
+      return indices.map(idx => {
+        const c = state.archive[idx];
+        const spent = c.transactions.reduce((s, t) => s + t.amount, 0);
+        const rows = c.transactions.length === 0 ? '<div class="empty-msg">لا توجد عمليات مسجلة.</div>' : c.transactions.map(t => `<div class="project-line"><span>${t.charity} (${t.project}) — <small style="direction:ltr; display:inline-block;">${t.date}</small></span><strong style="direction:ltr;">${formatKWD(t.amount)} KWD</strong></div>`).join('');
+        return `<div class="card" style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:6px;"><span>تقرير دورة #${(idx + 1).toLocaleString('en-US')}</span><span style="direction:ltr;">${c.startDate} → ${c.endDate}</span></div><div style="font-size:0.85rem; margin-bottom:8px;">الميزانية: <strong style="direction:ltr; display:inline-block;">${formatKWD(c.budget)}</strong> KWD | المصروف: <strong style="direction:ltr; display:inline-block;">${formatKWD(spent)}</strong> KWD | العمليات: ${c.transactions.length.toLocaleString('en-US')}</div>${rows}</div>`;
+      }).join('');
+    }
+    window.viewArchiveDetails = async function(idx) {
+      const c = state.archive[idx];
+      const spent = c.transactions.reduce((s, t) => s + t.amount, 0);
+      const list = c.transactions.length ? c.transactions.map(t => `• ${t.charity} (${t.project}): ${formatKWD(t.amount)} KWD [${t.date}]`).join('\n') : 'لا توجد عمليات مسجلة.';
+      await showPopup(`تفاصيل دورة #${(idx + 1).toLocaleString('en-US')}`, `الفترة: ${c.startDate} إلى ${c.endDate}\nالميزانية: ${formatKWD(c.budget)} KWD | المصروف: ${formatKWD(spent)} KWD\n\nالعمليات:\n${list}`);
+    };
+    window.printArchiveIndices = function(indices) {
+      document.getElementById('archive-print-area').innerHTML = buildArchiveReportHTML(indices);
+      document.body.classList.add('print-archive-mode');
+      setTimeout(() => { window.print(); document.body.classList.remove('print-archive-mode'); }, 150);
+    };
+    window.toggleSelectAllArchive = function() {
+      const checks = Array.from(document.querySelectorAll('.arch-check'));
+      const allChecked = checks.length > 0 && checks.every(ch => ch.checked);
+      checks.forEach(ch => ch.checked = !allChecked);
+    };
+    window.exportSelectedArchive = async function() {
+      const selected = Array.from(document.querySelectorAll('.arch-check:checked')).map(ch => Number(ch.value));
+      if (selected.length === 0) { await showPopup('تنبيه', 'يرجى تحديد دورة واحدة على الأقل للتصدير.'); return; }
+      printArchiveIndices(selected);
+    };
+    window.deleteSingleArchive = async function(idx) {
+      const ok = await showPopup('حذف الدورة', `هل تريد حذف دورة #${(idx + 1).toLocaleString('en-US')} من الأرشيف نهائياً؟`, true, true);
+      if (!ok) return;
+      state.archive.splice(idx, 1);
+      saveState(); renderAll();
+    };
+    window.deleteSelectedArchive = async function() {
+      const selected = Array.from(document.querySelectorAll('.arch-check:checked')).map(ch => Number(ch.value));
+      if (selected.length === 0) { await showPopup('تنبيه', 'يرجى تحديد دورة واحدة على الأقل للمسح.'); return; }
+      const ok = await showPopup('مسح الدورات المحددة', `سيتم حذف (${selected.length.toLocaleString('en-US')}) دورات نهائياً من الأرشيف. هل أنت متأكد؟`, true, true);
+      if (!ok) return;
+      state.archive = state.archive.filter((_, i) => !selected.includes(i));
+      saveState(); renderAll();
+    };
     function showPopup(title, msg, isConfirm = false, isDanger = false) {
       return new Promise(resolve => {
         const overlay = document.getElementById('custom-modal');
@@ -587,22 +633,15 @@
         okBtn.textContent = isConfirm ? 'تأكيد' : 'حسناً';
         cancelBtn.style.display = isConfirm ? 'inline-flex' : 'none';
         overlay.classList.add('show');
-        const cleanup = (result) => {
-          overlay.classList.remove('show');
-          okBtn.onclick = null;
-          cancelBtn.onclick = null;
-          resolve(result);
-        };
+        const cleanup = (res) => { overlay.classList.remove('show'); okBtn.onclick = null; cancelBtn.onclick = null; resolve(res); };
         okBtn.onclick = () => cleanup(true);
         cancelBtn.onclick = () => cleanup(false);
       });
     }
     window.deleteTx = async function(id) {
-      const ok = await showPopup('حذف العملية', 'هل تريد حذف هذه الصدقة من السجل؟', true, true);
-      if (!ok) return;
+      if (!(await showPopup('حذف العملية', 'هل تريد حذف هذه الصدقة من السجل؟', true, true))) return;
       state.currentCycle.transactions = state.currentCycle.transactions.filter(t => t.id !== id);
-      saveState();
-      renderAll();
+      saveState(); renderAll();
     };
     document.getElementById('donate-form').addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -614,46 +653,34 @@
       const currentRem = getCurrentRemaining();
       if (amount > currentRem) {
         const excess = amount - Math.max(0, currentRem);
-        const ok = await showPopup('تجاوز الرصيد المتاح', `هذا المبلغ يتجاوز الرصيد المتبقي بمقدار ${formatKWD(excess)} KWD.\nهل تريد تسجيل الصدقة وخصم الزيادة من الدورة القادمة؟`, true, false);
-        if (!ok) return;
+        if (!(await showPopup('تجاوز الرصيد المتاح', `هذا المبلغ يتجاوز الرصيد المتبقي بمقدار ${formatKWD(excess)} KWD.\nهل تريد تسجيل الصدقة وخصم الزيادة من الدورة القادمة؟`, true, false))) return;
       }
       state.currentCycle.transactions.push({ id: Date.now().toString(36), amount, charity, project, date: getTodayISO() });
-      saveState();
-      this.reset();
-      renderAll();
+      saveState(); this.reset(); renderAll();
     });
     document.getElementById('cycle-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const newAmt = parseArabicNumber(document.getElementById('cycle-amount').value);
       const startDate = document.getElementById('cycle-date').value || getTodayISO();
       if (isNaN(newAmt) || newAmt < 0) { await showPopup('تنبيه', 'يرجى إدخال مبلغ صحيح.'); return; }
-      const carriedOver = getCurrentRemaining();
-      const finalBudget = Math.max(0, newAmt + carriedOver);
-      if (state.currentCycle.budget > 0 || state.currentCycle.transactions.length > 0) {
-        state.archive.push({ ...state.currentCycle, endDate: getTodayISO() });
-      }
+      const finalBudget = Math.max(0, newAmt + getCurrentRemaining());
+      if (state.currentCycle.budget > 0 || state.currentCycle.transactions.length > 0) state.archive.push({ ...state.currentCycle, endDate: getTodayISO() });
       state.currentCycle = { budget: finalBudget, startDate, transactions: [] };
-      saveState();
-      this.reset();
-      document.getElementById('cycle-date').value = getTodayISO();
-      renderAll();
+      saveState(); this.reset(); document.getElementById('cycle-date').value = getTodayISO(); renderAll();
       await showPopup('تم اعتماد الدورة', `تم بدء الدورة الجديدة بصافي ميزانية: ${formatKWD(finalBudget)} KWD`);
     });
     document.getElementById('btn-reset-all').addEventListener('click', async function() {
-      const ok = await showPopup('تصفير كافة البيانات', 'تحذير: سيتم مسح جميع العمليات والأرشيف نهائياً. هل أنت متأكد؟', true, true);
-      if (!ok) return;
+      if (!(await showPopup('تصفير كافة البيانات', 'تحذير: سيتم مسح جميع العمليات والأرشيف نهائياً. هل أنت متأكد؟', true, true))) return;
       localStorage.removeItem(STORAGE_KEY);
       state = { currentCycle: { budget: 0, startDate: getTodayISO(), transactions: [] }, archive: [] };
-      saveState();
-      renderAll();
+      saveState(); renderAll();
     });
-    document.getElementById('btn-print-pdf').addEventListener('click', function() { setTimeout(() => { window.print(); }, 150); });
+    document.getElementById('btn-print-pdf').addEventListener('click', function() { document.body.classList.remove('print-archive-mode'); setTimeout(() => { window.print(); }, 150); });
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(btn.dataset.target).classList.add('active');
+        btn.classList.add('active'); document.getElementById(btn.dataset.target).classList.add('active');
       });
     });
     document.getElementById('cycle-date').value = getTodayISO();
