@@ -3,11 +3,11 @@
   "short_name": "صدقات",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#232A34",
+  "theme_color": "#232A34",
   "icons": [
     {
-      "src": "https://flaticon.com",
+      "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }

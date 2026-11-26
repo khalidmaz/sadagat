@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-title" content="صدقات">
 <meta name="theme-color" content="#232A34">
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
 <title>صدقات</title>
 <style>
 :root{--navy:#232A34;--navy-dark:#1A2028;--ivory:#E8E1D5;--ivory-light:#F3EFE8;--mint:#1FE6A0;--mint-dark:#15B87E;--danger:#D9534F;--text-dark:#1E242B;--text-muted:#5C6672}
@@ -16,6 +18,7 @@ body{background:var(--navy);color:var(--ivory);margin:0;padding:16px;padding-top
 .container{max-width:480px;margin:0 auto}
 .app-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
 .app-title{display:flex;align-items:center;gap:10px;font-size:1.4rem;font-weight:800;color:var(--ivory)}
+.app-logo{width:34px;height:34px;border-radius:9px;object-fit:cover;border:1.5px solid rgba(31,230,160,0.4)}
 .badge-accent{background:rgba(31,230,160,0.15);color:var(--mint);padding:4px 10px;border-radius:20px;font-size:0.78rem;font-weight:600;border:1px solid rgba(31,230,160,0.3)}
 .card{background:var(--ivory);color:var(--text-dark);border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 8px 20px rgba(0,0,0,0.2)}
 .card-header{display:flex;align-items:center;gap:8px;font-size:1.05rem;font-weight:700;margin-bottom:14px;color:var(--navy)}
@@ -53,7 +56,7 @@ input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(35
 <div class="container">
 <div class="print-header"><h1 style="margin:0;color:#232A34">تقرير إحصائيات الصدقات</h1><p id="printDate" style="margin:5px 0 0;color:#555;font-size:0.9rem"></p></div>
 <div class="app-header no-print">
-<div class="app-title"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1FE6A0" stroke-width="2.2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg><span>صدقات</span></div>
+<div class="app-title"><img src="icon.png" alt="صدقات" class="app-logo" onerror="this.style.display='none'"><span>صدقات</span></div>
 <div class="badge-accent" id="headerStartDate">دورة نشطة</div>
 </div>
 
@@ -124,5 +127,3 @@ input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(35
 if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>{for(let reg of r)reg.unregister()})}
 
 function getTodayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function parseCleanNumber(val){if(!val)return 0;const m={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9','٫':'.','،':'.'};return parseFloat(String(val).replace(/[٠-٩۰-۹٫،]/g,c=>m[c]).replace(/[^\d.-]/g,''))||0}
-
