@@ -353,7 +353,8 @@
           </div>
           <div class="form-group">
             <label for="inp-project">المشروع الخيري</label>
-            <input type="text" id="inp-project" placeholder="مثال: كفالة يتيم، سقيا ماء، إطعام" required />
+            <input type="text" id="inp-project" list="projects-list" placeholder="مثال: كفالة يتيم، سقيا ماء، إطعام" required />
+            <datalist id="projects-list"></datalist>
           </div>
           <button type="submit" class="btn btn-primary">إضافة الصدقة</button>
         </form>
@@ -364,14 +365,27 @@
       </div>
     </section>
 
-        <section id="tab-cycle" class="tab-section">
+            <section id="tab-cycle" class="tab-section">
+      <div class="card">
+        <div class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          زيادة رصيد الدورة الحالية
+        </div>
+        <form id="topup-form">
+          <div class="form-group">
+            <label for="topup-amount">مبلغ الزيادة الإضافي (د.ك)</label>
+            <input type="text" id="topup-amount" inputmode="decimal" placeholder="مثال: 50 أو ٥٠" required />
+          </div>
+          <button type="submit" class="btn btn-dark">إضافة لرصيد الدورة الحالية</button>
+        </form>
+      </div>
       <div class="card">
         <div class="card-title">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
           بدء دورة صدقات جديدة
         </div>
         <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:14px; line-height:1.5;">
-          سيتم أرشفة الدورة الحالية تلقائياً، وترحيل الرصيد المتبقي (<strong id="carry-preview" style="direction:ltr; display:inline-block;">0.000</strong> د.ك) وإضافته للمبلغ الجديد.
+          سيتم أرشفة الدورة الحالية تلقائياً، وترحيل الرصيد المتبقي (<strong id="carry-preview" style="direction:ltr; display:inline-block;">0.000</strong> KWD) وإضافته للمبلغ الجديد.
         </p>
         <form id="cycle-form">
           <div class="form-group">
@@ -384,6 +398,27 @@
           </div>
           <button type="submit" class="btn btn-primary">اعتماد الدورة الجديدة وترحيل المتبقي</button>
         </form>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          النسخ الاحتياطي (Dropbox / الملفات)
+        </div>
+        <div class="form-group">
+          <label for="backup-freq">التنبيه الدوري للنسخ الاحتياطي</label>
+          <select id="backup-freq">
+            <option value="off">إيقاف التنبيه التلقائي</option>
+            <option value="daily">يومياً</option>
+            <option value="weekly">أسبوعياً</option>
+            <option value="monthly">شهرياً</option>
+          </select>
+        </div>
+        <p id="last-backup-info" style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">آخر نسخة احتياطية: لم يتم الحفظ بعد</p>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <button type="button" id="btn-export-backup" class="btn btn-primary btn-sm">حفظ نسخة الآن</button>
+          <button type="button" id="btn-import-backup" class="btn btn-dark btn-sm">استعادة نسخة</button>
+        </div>
+        <input type="file" id="backup-file-input" accept=".json,application/json" style="display:none;" />
         <button type="button" id="btn-reset-all" class="btn btn-danger">تصفير كافة البيانات والأرشيف</button>
       </div>
     </section>
@@ -391,32 +426,17 @@
       <div class="card">
         <div class="card-title">الإحصائيات الشاملة</div>
         <div class="summary-grid">
-          <div class="stat-box">
-            <div class="stat-label">إجمالي الصدقات</div>
-            <div class="stat-val highlight" id="stat-total-all">0.000</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">عدد العمليات</div>
-            <div class="stat-val" id="stat-count-all">0</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">متوسط الصدقة</div>
-            <div class="stat-val" id="stat-avg-all">0.000</div>
-          </div>
+          <div class="stat-box"><div class="stat-label">إجمالي الصدقات</div><div class="stat-val highlight" id="stat-total-all">0.000</div></div>
+          <div class="stat-box"><div class="stat-label">عدد العمليات</div><div class="stat-val" id="stat-count-all">0</div></div>
+          <div class="stat-box"><div class="stat-label">متوسط الصدقة</div><div class="stat-val" id="stat-avg-all">0.000</div></div>
         </div>
-        <button type="button" id="btn-print-pdf" class="btn btn-dark no-print" style="margin-top:14px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          تصدير التقرير الشامل كملف PDF
-        </button>
+        <div style="display:flex; gap:8px; margin-top:14px;" class="no-print">
+          <button type="button" id="btn-print-pdf" class="btn btn-dark btn-sm">تصدير PDF شامل</button>
+          <button type="button" id="btn-export-csv" class="btn btn-primary btn-sm">تصدير Excel (CSV)</button>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-title">توزيع الصدقات حسب الجهات الخيرية</div>
-        <div id="charity-bars"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">تفاصيل الجهات والمشاريع</div>
-        <div id="charity-projects-breakdown"></div>
-      </div>
+      <div class="card"><div class="card-title">توزيع الصدقات حسب الجهات الخيرية</div><div id="charity-bars"></div></div>
+      <div class="card"><div class="card-title">تفاصيل الجهات والمشاريع</div><div id="charity-projects-breakdown"></div></div>
       <div class="card no-print">
         <div class="card-title">أرشيف الدورات السابقة</div>
         <div id="archive-toolbar" class="arch-toolbar" style="display:none;">
@@ -429,7 +449,7 @@
     </section>
   </main>
 
-      <div id="archive-print-area" class="container"></div>
+        <div id="archive-print-area" class="container"></div>
   <nav class="bottom-nav no-print">
     <button type="button" class="nav-btn active" data-target="tab-donate">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -454,41 +474,51 @@
       </div>
     </div>
   </div>
+  <div id="edit-modal" class="modal-overlay no-print">
+    <div class="modal-box">
+      <div class="modal-title">تعديل بيانات الصدقة</div>
+      <form id="edit-tx-form">
+        <input type="hidden" id="edit-tx-id" />
+        <div class="form-group"><label for="edit-amount">المبلغ (د.ك)</label><input type="text" id="edit-amount" inputmode="decimal" required /></div>
+        <div class="form-group"><label for="edit-charity">الجهة الخيرية</label><input type="text" id="edit-charity" list="charities-list" required /></div>
+        <div class="form-group"><label for="edit-project">المشروع الخيري</label><input type="text" id="edit-project" list="projects-list" required /></div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">حفظ التعديل</button>
+          <button type="button" id="edit-cancel-btn" class="btn btn-dark">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <script>
     const STORAGE_KEY = 'sadaqah_kwd_app_v1';
     function getTodayISO() {
       const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth() + 1).padStart(2, '0');
-      const d = String(now.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     }
     let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
       currentCycle: { budget: 0, startDate: getTodayISO(), transactions: [] },
-      archive: []
+      archive: [],
+      backupSettings: { freq: 'weekly', lastBackup: '' }
     };
+    if (!state.backupSettings) state.backupSettings = { freq: 'weekly', lastBackup: '' };
     function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     function parseArabicNumber(str) {
       if (!str) return NaN;
       const map = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','٫':'.',',':'.'};
-      const cleaned = String(str).trim().replace(/[٠-٩٫,]/g, ch => map[ch] || ch);
-      return parseFloat(cleaned);
+      return parseFloat(String(str).trim().replace(/[٠-٩٫,]/g, ch => map[ch] || ch));
     }
     function formatKWD(num) {
       return Number(num || 0).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
     }
     function calcDurationText(startISO) {
-      const start = new Date(startISO + 'T00:00:00');
-      const today = new Date(getTodayISO() + 'T00:00:00');
-      const diffDays = Math.max(0, Math.floor((today - start) / 86400000));
-      const months = Math.floor(diffDays / 30);
-      const days = diffDays % 30;
+      const diffDays = Math.max(0, Math.floor((new Date(getTodayISO() + 'T00:00:00') - new Date(startISO + 'T00:00:00')) / 86400000));
+      const months = Math.floor(diffDays / 30), days = diffDays % 30;
       if (months > 0 && days > 0) return `${months} شهر و ${days} يوم`;
       if (months > 0) return `${months} شهر`;
       return `${days} يوم`;
     }
 
-        function getCurrentSpent() {
+    function getCurrentSpent() {
       return state.currentCycle.transactions.reduce((sum, t) => sum + t.amount, 0);
     }
     function getCurrentRemaining() {
@@ -504,6 +534,10 @@
       const carryEl = document.getElementById('carry-preview');
       carryEl.textContent = formatKWD(remaining);
       carryEl.style.color = remaining < 0 ? 'var(--danger)' : 'inherit';
+      document.getElementById('backup-freq').value = state.backupSettings.freq || 'weekly';
+      document.getElementById('last-backup-info').textContent = state.backupSettings.lastBackup
+        ? `آخر نسخة احتياطية: ${state.backupSettings.lastBackup}`
+        : 'آخر نسخة احتياطية: لم يتم الحفظ بعد';
       const txContainer = document.getElementById('current-tx-list');
       if (state.currentCycle.transactions.length === 0) {
         txContainer.innerHTML = '<div class="empty-msg">لا توجد صدقات مسجلة في هذه الدورة بعد.</div>';
@@ -516,8 +550,11 @@
             </div>
             <div class="tx-actions">
               <span class="tx-amount">${formatKWD(tx.amount)} KWD</span>
+              <button type="button" class="icon-btn" style="background:rgba(35,42,52,0.12); color:var(--bg-dark);" onclick="openEditTx('${tx.id}')" title="تعديل">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
               <button type="button" class="icon-btn" onclick="deleteTx('${tx.id}')" title="حذف">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
               </button>
             </div>
           </div>
@@ -536,28 +573,28 @@
       document.getElementById('stat-total-all').textContent = formatKWD(totalAll);
       document.getElementById('stat-count-all').textContent = countAll.toLocaleString('en-US');
       document.getElementById('stat-avg-all').textContent = formatKWD(avgAll);
-      const charitiesSet = new Set(allTx.map(t => t.charity));
-      document.getElementById('charities-list').innerHTML = Array.from(charitiesSet).map(c => `<option value="${c}">`).join('');
+      document.getElementById('charities-list').innerHTML = Array.from(new Set(allTx.map(t => t.charity))).map(c => `<option value="${c}">`).join('');
+      document.getElementById('projects-list').innerHTML = Array.from(new Set(allTx.map(t => t.project))).map(p => `<option value="${p}">`).join('');
       const byCharity = {};
       allTx.forEach(t => {
         if (!byCharity[t.charity]) byCharity[t.charity] = { total: 0, projects: {} };
         byCharity[t.charity].total += t.amount;
         byCharity[t.charity].projects[t.project] = (byCharity[t.charity].projects[t.project] || 0) + t.amount;
       });
-      const sortedCharities = Object.entries(byCharity).sort((a, b) => b[1].total - a[1].total);
+      const sortedCharities = Object.entries(byCharity).sort((a, b) => b.total - a.total);
       const barsEl = document.getElementById('charity-bars');
       const breakdownEl = document.getElementById('charity-projects-breakdown');
       if (sortedCharities.length === 0) {
         barsEl.innerHTML = '<div class="empty-msg">لا توجد بيانات لعرض الرسم البياني.</div>';
         breakdownEl.innerHTML = '<div class="empty-msg">لا توجد مشاريع مسجلة بعد.</div>';
       } else {
-        const maxVal = sortedCharities[0][1].total || 1;
+        const maxVal = sortedCharities.total || 1;
         barsEl.innerHTML = sortedCharities.map(([name, data]) => {
           const pct = Math.round((data.total / maxVal) * 100);
           return `<div class="bar-row"><div class="bar-header"><span>${name}</span><span style="direction:ltr;">${formatKWD(data.total)} KWD</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div></div>`;
         }).join('');
         breakdownEl.innerHTML = sortedCharities.map(([name, data]) => {
-          const projLines = Object.entries(data.projects).sort((a, b) => b[1] - a[1]).map(([pName, pVal]) => {
+          const projLines = Object.entries(data.projects).sort((a, b) => b - a).map(([pName, pVal]) => {
             const pPct = data.total > 0 ? ((pVal / data.total) * 100).toFixed(1) : '0.0';
             return `<div class="project-line"><span>${pName}</span><span style="direction:ltr;">${formatKWD(pVal)} KWD (${pPct}%)</span></div>`;
           }).join('');
@@ -565,7 +602,7 @@
         }).join('');
       }
 
-                  const archiveEl = document.getElementById('archive-list');
+                        const archiveEl = document.getElementById('archive-list');
       const toolbarEl = document.getElementById('archive-toolbar');
       if (state.archive.length === 0) {
         toolbarEl.style.display = 'none';
@@ -608,18 +645,14 @@
       printArchiveIndices(selected);
     };
     window.deleteSingleArchive = async function(idx) {
-      const ok = await showPopup('حذف الدورة', `هل تريد حذف دورة #${(idx + 1).toLocaleString('en-US')} من الأرشيف نهائياً؟`, true, true);
-      if (!ok) return;
-      state.archive.splice(idx, 1);
-      saveState(); renderAll();
+      if (!(await showPopup('حذف الدورة', `هل تريد حذف دورة #${(idx + 1).toLocaleString('en-US')} من الأرشيف نهائياً؟`, true, true))) return;
+      state.archive.splice(idx, 1); saveState(); renderAll();
     };
     window.deleteSelectedArchive = async function() {
       const selected = Array.from(document.querySelectorAll('.arch-check:checked')).map(ch => Number(ch.value));
       if (selected.length === 0) { await showPopup('تنبيه', 'يرجى تحديد دورة واحدة على الأقل للمسح.'); return; }
-      const ok = await showPopup('مسح الدورات المحددة', `سيتم حذف (${selected.length.toLocaleString('en-US')}) دورات نهائياً من الأرشيف. هل أنت متأكد؟`, true, true);
-      if (!ok) return;
-      state.archive = state.archive.filter((_, i) => !selected.includes(i));
-      saveState(); renderAll();
+      if (!(await showPopup('مسح الدورات المحددة', `سيتم حذف (${selected.length.toLocaleString('en-US')}) دورات نهائياً من الأرشيف. هل أنت متأكد؟`, true, true))) return;
+      state.archive = state.archive.filter((_, i) => !selected.includes(i)); saveState(); renderAll();
     };
     function showPopup(title, msg, isConfirm = false, isDanger = false) {
       return new Promise(resolve => {
@@ -638,6 +671,28 @@
         cancelBtn.onclick = () => cleanup(false);
       });
     }
+    window.openEditTx = function(id) {
+      const tx = state.currentCycle.transactions.find(t => t.id === id);
+      if (!tx) return;
+      document.getElementById('edit-tx-id').value = tx.id;
+      document.getElementById('edit-amount').value = tx.amount;
+      document.getElementById('edit-charity').value = tx.charity;
+      document.getElementById('edit-project').value = tx.project;
+      document.getElementById('edit-modal').classList.add('show');
+    };
+    document.getElementById('edit-cancel-btn').onclick = () => document.getElementById('edit-modal').classList.remove('show');
+    document.getElementById('edit-tx-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-tx-id').value;
+      const amount = parseArabicNumber(document.getElementById('edit-amount').value);
+      const charity = document.getElementById('edit-charity').value.trim();
+      const project = document.getElementById('edit-project').value.trim();
+      if (isNaN(amount) || amount <= 0 || !charity || !project) { await showPopup('تنبيه', 'يرجى التأكد من إدخال جميع البيانات بشكل صحيح.'); return; }
+      const tx = state.currentCycle.transactions.find(t => t.id === id);
+      if (tx) { tx.amount = amount; tx.charity = charity; tx.project = project; }
+      saveState(); document.getElementById('edit-modal').classList.remove('show'); renderAll();
+    });
+
     window.deleteTx = async function(id) {
       if (!(await showPopup('حذف العملية', 'هل تريد حذف هذه الصدقة من السجل؟', true, true))) return;
       state.currentCycle.transactions = state.currentCycle.transactions.filter(t => t.id !== id);
@@ -658,6 +713,14 @@
       state.currentCycle.transactions.push({ id: Date.now().toString(36), amount, charity, project, date: getTodayISO() });
       saveState(); this.reset(); renderAll();
     });
+    document.getElementById('topup-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const addAmt = parseArabicNumber(document.getElementById('topup-amount').value);
+      if (isNaN(addAmt) || addAmt <= 0) { await showPopup('تنبيه', 'يرجى إدخال مبلغ صحيح أكبر من الصفر.'); return; }
+      state.currentCycle.budget += addAmt;
+      saveState(); this.reset(); renderAll();
+      await showPopup('تمت الزيادة', `تمت إضافة ${formatKWD(addAmt)} KWD إلى رصيد الدورة الحالية.`);
+    });
     document.getElementById('cycle-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const newAmt = parseArabicNumber(document.getElementById('cycle-amount').value);
@@ -669,10 +732,51 @@
       saveState(); this.reset(); document.getElementById('cycle-date').value = getTodayISO(); renderAll();
       await showPopup('تم اعتماد الدورة', `تم بدء الدورة الجديدة بصافي ميزانية: ${formatKWD(finalBudget)} KWD`);
     });
+    function triggerBackupDownload() {
+      const today = getTodayISO();
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `sadaqah-backup-${today}.json`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      state.backupSettings.lastBackup = today;
+      saveState(); renderAll();
+    }
+    document.getElementById('backup-freq').addEventListener('change', function() { state.backupSettings.freq = this.value; saveState(); });
+    document.getElementById('btn-export-backup').addEventListener('click', triggerBackupDownload);
+    document.getElementById('btn-import-backup').addEventListener('click', () => document.getElementById('backup-file-input').click());
+    document.getElementById('backup-file-input').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async function(ev) {
+        try {
+          const imported = JSON.parse(ev.target.result);
+          if (!imported.currentCycle || !Array.isArray(imported.archive)) throw new Error();
+          state = imported;
+          if (!state.backupSettings) state.backupSettings = { freq: 'weekly', lastBackup: getTodayISO() };
+          saveState(); renderAll();
+          await showPopup('تمت الاستعادة', 'تم استرجاع جميع بياناتك والأرشيف بنجاح.');
+        } catch { await showPopup('خطأ', 'الملف المختار غير صالح أو تالف.'); }
+      };
+      reader.readAsText(file);
+      this.value = '';
+    });
+    document.getElementById('btn-export-csv').addEventListener('click', async function() {
+      const rows = [['الدورة', 'التاريخ', 'الجهة الخيرية', 'المشروع', 'المبلغ (KWD)']];
+      state.archive.forEach((c, i) => c.transactions.forEach(t => rows.push([`دورة #${i + 1}`, t.date, t.charity, t.project, formatKWD(t.amount)])));
+      state.currentCycle.transactions.forEach(t => rows.push(['الدورة الحالية', t.date, t.charity, t.project, formatKWD(t.amount)]));
+      if (rows.length === 1) { await showPopup('تنبيه', 'لا توجد عمليات لتصديرها.'); return; }
+      const csv = '\uFEFF' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      a.download = `sadaqah-report-${getTodayISO()}.csv`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    });
     document.getElementById('btn-reset-all').addEventListener('click', async function() {
       if (!(await showPopup('تصفير كافة البيانات', 'تحذير: سيتم مسح جميع العمليات والأرشيف نهائياً. هل أنت متأكد؟', true, true))) return;
       localStorage.removeItem(STORAGE_KEY);
-      state = { currentCycle: { budget: 0, startDate: getTodayISO(), transactions: [] }, archive: [] };
+      state = { currentCycle: { budget: 0, startDate: getTodayISO(), transactions: [] }, archive: [], backupSettings: { freq: 'weekly', lastBackup: '' } };
       saveState(); renderAll();
     });
     document.getElementById('btn-print-pdf').addEventListener('click', function() { document.body.classList.remove('print-archive-mode'); setTimeout(() => { window.print(); }, 150); });
@@ -683,8 +787,23 @@
         btn.classList.add('active'); document.getElementById(btn.dataset.target).classList.add('active');
       });
     });
+    async function checkScheduledBackup() {
+      const freq = state.backupSettings.freq;
+      if (!freq || freq === 'off') return;
+      const hasData = state.currentCycle.transactions.length > 0 || state.archive.length > 0;
+      if (!hasData) return;
+      const last = state.backupSettings.lastBackup;
+      const limitDays = freq === 'daily' ? 1 : freq === 'weekly' ? 7 : 30;
+      const diff = last ? Math.floor((new Date(getTodayISO() + 'T00:00:00') - new Date(last + 'T00:00:00')) / 86400000) : limitDays;
+      if (diff >= limitDays) {
+        if (await showPopup('موعد النسخ الاحتياطي', 'حان موعد حفظ نسخة احتياطية دورية لبيانات صدقاتك.\nهل تريد حفظ الملف الآن في Dropbox أو الملفات؟', true, false)) {
+          triggerBackupDownload();
+        }
+      }
+    }
     document.getElementById('cycle-date').value = getTodayISO();
     renderAll();
+    setTimeout(checkScheduledBackup, 800);
   </script>
 </body>
 </html>
