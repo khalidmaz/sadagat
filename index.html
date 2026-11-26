@@ -31,7 +31,7 @@ body{background:var(--navy);color:var(--ivory);margin:0;padding:16px;padding-top
 .stat-box-label{font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px}
 .stat-box-val{font-size:1.05rem;font-weight:700;color:var(--navy);margin-top:4px}
 label{display:block;font-size:0.82rem;font-weight:600;color:var(--text-muted);margin-bottom:6px}
-input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(35,42,52,0.15);background:var(--ivory-light);color:var(--navy);font-size:0.95rem;font-weight:600;margin-bottom:14px;outline:none}
+input{width:100%;max-width:100%;-webkit-appearance:none;appearance:none;display:block;min-height:48px;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(35,42,52,0.15);background:var(--ivory-light);color:var(--navy);font-size:0.95rem;font-weight:600;margin-bottom:14px;outline:none}
 .btn{width:100%;padding:14px;border-radius:14px;border:none;font-size:0.98rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-mint{background:var(--mint);color:var(--navy);box-shadow:0 4px 12px rgba(31,230,160,0.35)}
 .btn-danger-outline{background:transparent;border:1.5px solid var(--danger);color:var(--danger);margin-top:10px}
@@ -40,7 +40,7 @@ input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(35
 .entity-pill{display:inline-block;background:var(--navy);color:var(--mint);font-size:0.74rem;padding:2px 8px;border-radius:6px;font-weight:600;margin-left:6px}
 .del-btn{background:rgba(217,83,79,0.12);color:var(--danger);border:none;padding:6px 10px;border-radius:8px;cursor:pointer}
 .tab-section{display:none}
-.tab-section.active{display:block}
+input{width:100%;max-width:100%;-webkit-appearance:none;appearance:none;display:block;min-height:48px;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(35,42,52,0.15);background:var(--ivory-light);color:var(--navy);font-size:0.95rem;font-weight:600;margin-bottom:14px;outline:none}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--navy-dark);border-top:1px solid rgba(232,225,213,0.1);display:flex;justify-content:space-around;padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));z-index:100}
 .nav-item{background:none;border:none;color:rgba(232,225,213,0.55);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:0.75rem;font-weight:600;cursor:pointer;width:33.3%}
 .nav-item.active{color:var(--mint)}
@@ -122,7 +122,7 @@ input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(35
 <button type="button" class="nav-item" id="nav-cycle" onclick="doSwitchTab('cycle')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg><span>دورة جديدة</span></button>
 <button type="button" class="nav-item" id="nav-stats" onclick="doSwitchTab('stats')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>الإحصائيات</span></button>
 </nav>
-
+<script src="https://cloudflare.com"></script>
 <script src="app.js"></script>
 </body>
 </html>

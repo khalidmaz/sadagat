@@ -156,8 +156,20 @@ function doResetAll() {
 }
 
 function doExportPDF() {
-    document.getElementById('printDate').textContent = 'تاريخ استخراج التقرير: ' + getTodayStr();
-    window.print();
+    var element = document.getElementById('tab-stats');
+    var opt = {
+        margin: 10,
+        filename: 'تقرير-صدقات-' + getTodayStr() + '.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, backgroundColor: '#232A34' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opt).from(element).save();
+    } else {
+        document.getElementById('printDate').textContent = 'تاريخ استخراج التقرير: ' + getTodayStr();
+        window.print();
+    }
 }
 
 function render() {
