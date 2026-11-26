@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="صدقات">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://flaticon.com">
+    <title>صدقات</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --primary: #10b981; --accent: #3b82f6; --gold: #f59e0b; --red: #ef4444; --text: #f8fafc; --muted: #94a3b8; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-top: env(safe-area-inset-top, 20px); padding-bottom: 40px; }
+        .container { max-width: 480px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 16px; font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+        .card { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .stat-box { background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; text-align: center; }
+        .stat-val { font-size: 1.2rem; font-weight: bold; margin-top: 4px; }
+        .stat-label { font-size: 0.85rem; color: var(--muted); }
+        .green { color: var(--primary); }
+        .gold { color: var(--gold); }
+        .red { color: var(--red); }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 1rem; margin-bottom: 10px; }
+        button { width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: #0f172a; }
+        .btn-accent { background: var(--accent); color: white; }
+        .btn-outline { background: transparent; border: 1px solid #475569; color: var(--muted); margin-top: 8px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #334155; }
+        .list-item:last-child { border-bottom: none; }
+        .del-btn { background: rgba(239,68,68,0.2); color: var(--red); width: auto; padding: 6px 12px; font-size: 0.85rem; }
+        .archive-box { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; margin-bottom: 10px; border-right: 3px solid var(--gold); }
+        .total-banner { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 14px; }
+        h3 { margin-top: 0; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">صدقات</div>
+
+    <div class="card">
+        <div class="stat-label" style="text-align:center;">المتبقي في رصيد الصدقات</div>
+        <div id="remainingDisplay" style="font-size: 2.3rem; font-weight: bold; text-align: center; margin: 8px 0;" class="green">0 د.ك</div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-label">الإجمالي (مع المرحّل)</div>
+                <div id="totalBudgetDisplay" class="stat-val">0 د.ك</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">مدة الصرف</div>
+                <div id="durationDisplay" class="stat-val">0 يوم</div>
+            </div>
+        </div>
+        <div id="startDateDisplay" class="stat-label" style="text-align:center;">بداية الدورة: لم يحدد</div>
+    </div>
+
+    <div class="card">
+        <h3>إخراج صدقة جديدة</h3>
+        <input type="number" id="expenseAmount" placeholder="المبلغ (د.ك)" step="0.001">
+        <input type="text" id="expenseNote" placeholder="الجهة أو الملاحظة (اختياري)">
+        <button class="btn-primary" onclick="addExpense()">تسجيل وخصم المبلغ</button>
+    </div>
+
+    <div class="card">
+        <h3>سجل الصدقات للدورة الحالية</h3>
+        <div id="expensesList"></div>
+    </div>
+
+    <div class="card">
+        <h3>دورة جديدة (إيداع + ترحيل المتبقي)</h3>
+        <input type="number" id="newBudgetAmount" placeholder="المبلغ الجديد المخصص (د.ك)" step="0.001">
+        <input type="date" id="newStartDate">
+        <button class="btn-accent" onclick="startNewCycle()">حفظ الحالية بالأرشيف وبدء دورة</button>
+        <button class="btn-outline" onclick="resetAll()">تصفير كل البيانات والأرشيف</button>
+    </div>
+
+    <div class="card">
+        <h3>أرشيف الدورات السابقة</h3>
+        <div class="total-banner">
+            <div class="stat-label">إجمالي الصدقات الكلي (الحالية + السابقة)</div>
+            <div id="grandTotalDisplay" class="gold" style="font-size: 1.4rem; font-weight: bold; margin-top: 4px;">0 د.ك</div>
+        </div>
+        <div id="archiveList"></div>
+    </div>
+</div>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+
+    const todayStr = new Date().toISOString().split('T');
+
+    let data = JSON.parse(localStorage.getItem('sadaqatTrackerDataV2')) || {
+        carriedOver: 0,
+        baseBudget: 0,
+        startDate: todayStr,
+        expenses: [],
+        archive: []
+    };
+
+    document.getElementById('newStartDate').value = todayStr;
+
+    function formatKWD(num) {
+        const rounded = Math.round(num * 1000) / 1000;
+        return rounded.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 }) + ' د.ك';
+    }
+
+    function saveData() {
+        localStorage.setItem('sadaqatTrackerDataV2', JSON.stringify(data));
+        render();
+    }
+
+    function calculateDuration(startStr, endStr) {
+        let start = new Date(startStr);
+        let end = new Date(endStr);
+        if (end < start) return "0 يوم";
+
+        let months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+        let tempDate = new Date(start);
+        tempDate.setMonth(start.getMonth() + months);
+
+        if (tempDate > end) {
+            months--;
+            tempDate = new Date(start);
+            tempDate.setMonth(start.getMonth() + months);
+        }
+
+        let days = Math.floor((end - tempDate) / (1000 * 60 * 60 * 24));
+        let parts = [];
+        if (months > 0) parts.push(`${months} شهر`);
+        if (days > 0 || months === 0) parts.push(`${days} يوم`);
+        return parts.join(' و ');
+    }
+
+    function addExpense() {
+        const amt = parseFloat(document.getElementById('expenseAmount').value);
+        const note = document.getElementById('expenseNote').value.trim() || 'صدقة';
+        if (!amt || amt <= 0) return alert('الرجاء إدخال مبلغ صحيح');
+
+        data.expenses.unshift({
+            id: Date.now(),
+            amount: amt,
+            note: note,
+            date: new Date().toISOString().split('T')
+        });
+
+        document.getElementById('expenseAmount').value = '';
+        document.getElementById('expenseNote').value = '';
+        saveData();
+    }
+
+    function deleteExpense(id) {
+        data.expenses = data.expenses.filter(e => e.id !== id);
+        saveData();
+    }
+
+    function startNewCycle() {
+        const newAmt = parseFloat(document.getElementById('newBudgetAmount').value) || 0;
+        const newDate = document.getElementById('newStartDate').value;
+        if (!newDate) return alert('اختر تاريخ البداية');
+
+        const totalAvailable = data.baseBudget + data.carriedOver;
+        const totalSpent = data.expenses.reduce((sum, e) => sum + e.amount, 0);
+        const remaining = totalAvailable - totalSpent;
+        const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toISOString().split('T');
+        const duration = calculateDuration(data.startDate, lastDate);
+
+        if (totalAvailable > 0 || totalSpent > 0) {
+            data.archive.unshift({
+                id: Date.now(),
+                startDate: data.startDate,
+                endDate: lastDate,
+                totalAvailable: totalAvailable,
+                spent: totalSpent,
+                remaining: remaining,
+                duration: duration,
+                count: data.expenses.length
+            });
+        }
+
+        data.carriedOver = remaining;
+        data.baseBudget = newAmt;
+        data.startDate = newDate;
+        data.expenses = [];
+
+        document.getElementById('newBudgetAmount').value = '';
+        saveData();
+        alert(`تم أرشفة الدورة السابقة وترحيل (${formatKWD(remaining)}) للدورة الجديدة.`);
+    }
+
+    function resetAll() {
+        if (confirm('تحذير: سيتم مسح الدورة الحالية وجميع الدورات المؤرشفة. هل أنت متأكد؟')) {
+            data = { carriedOver: 0, baseBudget: 0, startDate: new Date().toISOString().split('T'), expenses: [], archive: [] };
+            saveData();
+        }
+    }
+
+    function render() {
+        const totalAvailable = data.baseBudget + data.carriedOver;
+        const totalSpent = data.expenses.reduce((sum, e) => sum + e.amount, 0);
+        const remaining = totalAvailable - totalSpent;
+
+        const remEl = document.getElementById('remainingDisplay');
+        remEl.textContent = formatKWD(remaining);
+        remEl.className = remaining >= 0 ? 'green' : 'red';
+
+        document.getElementById('totalBudgetDisplay').textContent = formatKWD(totalAvailable);
+        document.getElementById('startDateDisplay').textContent = `بداية الدورة: ${data.startDate} (مرحّل: ${formatKWD(data.carriedOver)})`;
+
+        const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toISOString().split('T');
+        document.getElementById('durationDisplay').textContent = calculateDuration(data.startDate, lastDate);
+
+        const listEl = document.getElementById('expensesList');
+        if (data.expenses.length === 0) {
+            listEl.innerHTML = '<div style="color:var(--muted); text-align:center;">لا توجد صدقات مسجلة في هذه الدورة</div>';
+        } else {
+            listEl.innerHTML = data.expenses.map(e => `
+                <div class="list-item">
+                    <div>
+                        <div style="font-weight:bold;">${e.note}</div>
+                        <div style="font-size:0.8rem; color:var(--muted);">${e.date}</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="green" style="font-weight:bold;">${formatKWD(e.amount)}</span>
+                        <button class="del-btn" onclick="deleteExpense(${e.id})">حذف</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const pastSpent = data.archive.reduce((sum, a) => sum + a.spent, 0);
+        document.getElementById('grandTotalDisplay').textContent = formatKWD(pastSpent + totalSpent);
+
+        const archiveEl = document.getElementById('archiveList');
+        if (data.archive.length === 0) {
+            archiveEl.innerHTML = '<div style="color:var(--muted); text-align:center; font-size:0.9rem;">لا توجد دورات سابقة مؤرشفة بعد</div>';
+        } else {
+            archiveEl.innerHTML = data.archive.map(a => `
+                <div class="archive-box">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:6px;">
+                        <span>من ${a.startDate} إلى ${a.endDate}</span>
+                        <span class="gold">${formatKWD(a.spent)}</span>
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--muted); display:flex; justify-content:space-between;">
+                        <span>المدة: ${a.duration} (${a.count} عمليات)</span>
+                        <span>المُرحّل: ${formatKWD(a.remaining)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    render();
+</script>
+</body>
+</html>
