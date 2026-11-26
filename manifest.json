@@ -1,15 +1,27 @@
 {
-  "name": "صدقات",
-  "short_name": "صدقات",
+  "name": "مِيزَان الصَّدَقَات | KWD",
+  "short_name": "ميزان الصدقات",
+  "description": "تطبيق شخصي لإدارة وتتبع الصدقات بالعملة الكويتية (د.ك)",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
   "background_color": "#232A34",
   "theme_color": "#232A34",
   "icons": [
     {
       "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
