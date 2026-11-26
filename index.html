@@ -1,358 +1,415 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="صدقات">
-<meta name="theme-color" content="#232A34">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.png">
-<link rel="icon" type="image/png" href="icon.png">
-<title>صدقات</title>
-<script src="https://cloudflare.com"></script>
-<style>
-:root {
-  --navy: #232A34;
-  --navy-dark: #1A2028;
-  --ivory: #E8E1D5;
-  --ivory-light: #F3EFE8;
-  --mint: #1FE6A0;
-  --mint-dark: #15B87E;
-  --danger: #D9534F;
-  --text-dark: #1E242B;
-  --text-muted: #5C6672;
-}
-* { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
-body { background: var(--navy); color: var(--ivory); margin: 0; padding: 16px; padding-top: env(safe-area-inset-top, 20px); padding-bottom: 95px; }
-.container { max-width: 480px; margin: 0 auto; }
-.app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-.app-title { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 800; color: var(--ivory); }
-.app-logo { width: 34px; height: 34px; border-radius: 9px; object-fit: cover; border: 1.5px solid rgba(31,230,160,0.4); }
-.badge-accent { background: rgba(31,230,160,0.15); color: var(--mint); padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(31,230,160,0.3); }
-.card { background: var(--ivory); color: var(--text-dark); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
-.card-header { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; color: var(--navy); }
-.balance-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
-.balance-val { font-size: 2.4rem; font-weight: 800; color: var(--navy); margin: 6px 0 14px; }
-.progress-wrap { background: rgba(35,42,52,0.12); height: 8px; border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
-.progress-fill { background: var(--mint-dark); height: 100%; border-radius: 10px; transition: width 0.4s ease; }
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.stat-box { background: rgba(35,42,52,0.06); padding: 12px; border-radius: 14px; }
-.stat-box-label { font-size: 0.78rem; color: var(--text-muted); }
-.stat-box-val { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-top: 4px; }
-label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
-input { width: 100%; max-width: 100%; -webkit-appearance: none; appearance: none; display: block; min-height: 48px; padding: 13px 14px; border-radius: 12px; border: 1.5px solid rgba(35,42,52,0.15); background: var(--ivory-light); color: var(--navy); font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; outline: none; }
-.btn { width: 100%; padding: 14px; border-radius: 14px; border: none; font-size: 0.98rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.btn-mint { background: var(--mint); color: var(--navy); box-shadow: 0 4px 12px rgba(31,230,160,0.35); }
-.btn-danger-outline { background: transparent; border: 1.5px solid var(--danger); color: var(--danger); margin-top: 10px; }
-.list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(35,42,52,0.1); }
-.list-item:last-child { border-bottom: none; }
-.entity-pill { display: inline-block; background: var(--navy); color: var(--mint); font-size: 0.74rem; padding: 2px 8px; border-radius: 6px; font-weight: 600; margin-left: 6px; }
-.del-btn { background: rgba(217,83,79,0.12); color: var(--danger); border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
-.tab-section { display: none; }
-.tab-section.active { display: block; }
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--navy-dark); border-top: 1px solid rgba(232,225,213,0.1); display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom,0px)); z-index: 100; }
-.nav-item { background: none; border: none; color: rgba(232,225,213,0.55); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; width: 33.3%; }
-.nav-item.active { color: var(--mint); }
-.nav-item svg { width: 22px; height: 22px; }
-.archive-item { background: rgba(35,42,52,0.05); padding: 14px; border-radius: 14px; margin-bottom: 10px; border-right: 4px solid var(--mint-dark); }
-.entity-bar-row { margin-bottom: 12px; }
-.entity-bar-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#232A34">
+  <title>صدقات</title>
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/png" href="icon.png">
+  <link href="https://googleapis.com" rel="stylesheet">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (let reg of regs) reg.unregister();
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        for (let name of names) caches.delete(name);
+      });
+    }
+  </script>
+  <style>
+    :root {
+      --bg-dark: #232A34;
+      --card-ivory: #E8E1D5;
+      --mint-green: #1FE6A0;
+      --mint-hover: #18c98a;
+      --text-dark: #1E242B;
+      --text-muted: #5A6470;
+      --danger: #D94343;
+      --input-bg: #F5F1EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+      padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 90px);
+      max-width: 500px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; color: #fff; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { width: 42px; height: 42px; border-radius: 10px; object-fit: cover; }
+    .brand h1 { font-size: 1.5rem; font-weight: 800; color: #fff; }
+    .badge { background: rgba(31, 230, 160, 0.15); color: var(--mint-green); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+    .card { background: var(--card-ivory); border-radius: 18px; padding: 18px; margin-bottom: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+    .card-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: var(--text-dark); }
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
+    .stat-box { background: var(--input-bg); padding: 12px; border-radius: 12px; text-align: center; }
+    .stat-box.full { grid-column: span 2; background: var(--bg-dark); color: #fff; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+    .stat-box.full .stat-label { color: #A0AAB5; }
+    .stat-val { font-size: 1.25rem; font-weight: 800; direction: ltr; display: inline-block; }
+    .stat-box.full .stat-val { font-size: 1.7rem; color: var(--mint-green); }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; color: var(--text-dark); }
+    input {
+      width: 100%; max-width: 100%; min-width: 0;
+      padding: 12px; border-radius: 12px; border: 1.5px solid #D3C9B8;
+      background: var(--input-bg); font-size: 1rem; color: var(--text-dark);
+      outline: none; appearance: none; -webkit-appearance: none;
+    }
+    input[type="date"] { display: block; min-height: 46px; text-align: right; }
+    input:focus { border-color: var(--bg-dark); }
+    .btn {
+      width: 100%; padding: 13px; border: none; border-radius: 12px;
+      background: var(--mint-green); color: var(--bg-dark);
+      font-size: 1rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: transform 0.1s;
+    }
+    .btn:active { transform: scale(0.98); background: var(--mint-hover); }
+    .btn-danger { background: transparent; border: 1.5px solid var(--danger); color: var(--danger); margin-top: 12px; }
+    .list-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px; background: var(--input-bg); border-radius: 12px; margin-bottom: 8px;
+    }
+    .item-info h4 { font-size: 0.95rem; font-weight: 700; }
+    .item-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+    .item-actions { display: flex; align-items: center; gap: 10px; }
+    .amount-tag { font-weight: 800; font-size: 0.95rem; direction: ltr; }
+    .del-btn { background: rgba(217,67,67,0.12); color: var(--danger); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .nav-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #1B2028; border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; justify-content: space-around;
+      padding: 10px 8px calc(env(safe-area-inset-bottom) + 10px);
+      z-index: 100;
+    }
+    .nav-item {
+      background: none; border: none; color: #8A94A6;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      font-size: 0.8rem; font-weight: 700; cursor: pointer; flex: 1;
+    }
+    .nav-item.active { color: var(--mint-green); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .progress-bar { height: 8px; background: #D3C9B8; border-radius: 6px; overflow: hidden; margin-top: 6px; }
+    .progress-fill { height: 100%; background: var(--bg-dark); border-radius: 6px; }
+    @media print {
+      body { background: #fff !important; color: #000 !important; padding: 0 !important; }
+      .nav-bar, .no-print, #tab-donate, #tab-cycle { display: none !important; }
+      #tab-stats { display: block !important; }
+      .card { box-shadow: none !important; border: 1px solid #ccc !important; background: #fff !important; break-inside: avoid; }
+      .stat-box.full { background: #f2f2f2 !important; color: #000 !important; }
+      .stat-box.full .stat-val { color: #000 !important; }
+      .header { color: #000 !important; border-bottom: 2px solid #000; padding-bottom: 10px; }
+      .header h1 { color: #000 !important; }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <div class="app-header">
-    <div class="app-title">
-      <img src="icon.png" alt="صدقات" class="app-logo" onerror="this.style.display='none'">
-      <span>صدقات</span>
+  <header class="header">
+    <div class="brand">
+      <img src="icon.png" alt="صدقات" onerror="this.style.display='none'">
+      <h1>صدقات</h1>
     </div>
-    <div class="badge-accent" id="headerStartDate">دورة نشطة</div>
-  </div>
+    <span class="badge" id="cycle-badge">دورة نشطة</span>
+  </header>
 
-  <div id="tab-donate" class="tab-section active">
+  <main id="tab-donate" class="tab-content active">
     <div class="card">
-      <div class="balance-label">المتبقي في رصيد الصدقات</div>
-      <div class="balance-val" id="remainingDisplay">0 د.ك</div>
-      <div class="progress-wrap"><div class="progress-fill" id="progressBar" style="width:100%"></div></div>
       <div class="stats-grid">
-        <div class="stat-box"><div class="stat-box-label">إجمالي الدورة</div><div class="stat-box-val" id="totalBudgetDisplay">0 د.ك</div></div>
-        <div class="stat-box"><div class="stat-box-label">مدة الصرف</div><div class="stat-box-val" id="durationDisplay">0 يوم</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><span>تسجيل صدقة جديدة</span></div>
-      <label>المبلغ (د.ك)</label>
-      <input type="text" inputmode="decimal" id="expenseAmount" placeholder="0.000">
-      <label>الجهة الخيرية أو المستفيد</label>
-      <input type="text" id="expenseEntity" placeholder="مثلاً: العون المباشر، بيت الزكاة">
-      <label>المشروع (اختياري)</label>
-      <input type="text" id="expenseProject" placeholder="مثلاً: كفالة يتيم، بئر ماء">
-      <button type="button" class="btn btn-mint" onclick="doAddExpense()">خصم وتسجيل الصدقة</button>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><span>سجل الدورة الحالية</span></div>
-      <div id="expensesList"></div>
-    </div>
-  </div>
-
-  <div id="tab-cycle" class="tab-section">
-    <div class="card">
-      <div class="card-header"><span>بدء دورة جديدة وترحيل المتبقي</span></div>
-      <div class="stat-box" style="margin-bottom:14px">
-        <div class="stat-box-label">الرصيد الحالي الذي سيتم ترحيله:</div>
-        <div class="stat-box-val" id="cycleCarryPreview" style="font-size:1.2rem;color:var(--mint-dark)">0 د.ك</div>
-      </div>
-      <label>المبلغ الجديد المخصص (د.ك)</label>
-      <input type="text" inputmode="decimal" id="newBudgetAmount" placeholder="0.000">
-      <label>تاريخ بداية الدورة</label>
-      <input type="date" id="newStartDate">
-      <button type="button" class="btn btn-mint" onclick="doStartCycle()">اعتماد الدورة الجديدة</button>
-      <button type="button" class="btn btn-danger-outline" onclick="doResetAll()">تصفير كافة البيانات والأرشيف</button>
-    </div>
-  </div>
-
-  <div id="tab-stats" class="tab-section">
-    <button type="button" class="btn btn-mint" onclick="doExportPDF()" style="margin-bottom:16px">تصدير تقرير الإحصائيات (PDF)</button>
-    <div id="pdfArea">
-      <div class="card">
-        <div class="card-header"><span>ملخص الإحصائيات العام</span></div>
-        <div class="stats-grid">
-          <div class="stat-box"><div class="stat-box-label">إجمالي الصدقات الكلي</div><div class="stat-box-val" id="grandTotalDisplay">0 د.ك</div></div>
-          <div class="stat-box"><div class="stat-box-label">عدد العمليات الكلي</div><div class="stat-box-val" id="totalCountDisplay">0</div></div>
-          <div class="stat-box"><div class="stat-box-label">متوسط الصدقة</div><div class="stat-box-val" id="avgDonationDisplay">0 د.ك</div></div>
-          <div class="stat-box"><div class="stat-box-label">عدد الدورات</div><div class="stat-box-val" id="cyclesCountDisplay">1</div></div>
+        <div class="stat-box full">
+          <div class="stat-label">المتبقي في رصيد الصدقات</div>
+          <div class="stat-val" id="rem-balance">0.000 د.ك</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">إجمالي الدورة</div>
+          <div class="stat-val" id="total-cycle">0.000 د.ك</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">مدة الصرف</div>
+          <div class="stat-val" id="cycle-duration">0 يوم</div>
         </div>
       </div>
-      <div class="card"><div class="card-header"><span>توزيع الصدقات حسب الجهة</span></div></div></div>
-      <div class="card"><div class="card-header"><span>أرشيف الدورات السابقة</span></div><div id="archiveList"></div></div>
     </div>
-  </div>
-</div>
+    <div class="card">
+      <div class="card-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+        تسجيل صدقة جديدة
+      </div>
+      <div class="form-group">
+        <label>المبلغ (د.ك)</label>
+        <input type="text" inputmode="decimal" id="inp-amount" placeholder="0.000">
+      </div>
+      <div class="form-group">
+        <label>الجهة الخيرية أو المستفيد</label>
+        <input type="text" id="inp-charity" list="charities-list" placeholder="مثال: بيت الزكاة، العون المباشر...">
+        <datalist id="charities-list"></datalist>
+      </div>
+      <div class="form-group">
+        <label>المشروع (اختياري)</label>
+        <input type="text" id="inp-project" placeholder="مثال: كفالة يتيم، سقيا ماء...">
+      </div>
+      <button type="button" class="btn" id="btn-add-donation">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        خصم وتسجيل الصدقة
+      </button>
+    </div>
 
-<nav class="bottom-nav">
-  <button type="button" class="nav-item active" id="nav-donate" onclick="doSwitchTab('donate')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-    <span>إخراج صدقة</span>
-  </button>
-  <button type="button" class="nav-item" id="nav-cycle" onclick="doSwitchTab('cycle')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
-    <span>دورة جديدة</span>
-  </button>
-  <button type="button" class="nav-item" id="nav-stats" onclick="doSwitchTab('stats')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    <span>الإحصائيات</span>
-  </button>
-</nav>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(function(regs) {
-    for (var i = 0; i < regs.length; i++) {
-      regs.item(i).unregister();
+    <div class="card">
+      <div class="card-title">سجل الدورة الحالية</div>
+      <div id="current-list"></div>
+    </div>
+  </main>
+
+  <main id="tab-cycle" class="tab-content">
+    <div class="card">
+      <div class="card-title">بدء دورة جديدة وترحيل المتبقي</div>
+      <div class="stat-box full" style="margin-bottom: 14px;">
+        <div class="stat-label">الرصيد الحالي الذي سيتم ترحيله</div>
+        <div class="stat-val" id="rollover-balance">0.000 د.ك</div>
+      </div>
+      <div class="form-group">
+        <label>المبلغ الجديد المخصص (د.ك)</label>
+        <input type="text" inputmode="decimal" id="inp-new-budget" placeholder="0.000">
+      </div>
+      <div class="form-group">
+        <label>تاريخ بداية الدورة</label>
+        <input type="date" id="inp-cycle-date">
+      </div>
+      <button type="button" class="btn" id="btn-start-cycle">اعتماد الدورة الجديدة</button>
+      <button type="button" class="btn btn-danger" id="btn-reset-all">تصفير كافة البيانات والأرشيف</button>
+    </div>
+  </main>
+  <main id="tab-stats" class="tab-content">
+    <button type="button" class="btn no-print" id="btn-export-pdf" style="margin-bottom: 16px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      تصدير تقرير الإحصائيات (PDF)
+    </button>
+
+    <div class="card">
+      <div class="card-title">ملخص الإحصائيات العام</div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">إجمالي الصدقات الكلي</div>
+          <div class="stat-val" id="stat-all-total">0.000 د.ك</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">عدد العمليات الكلي</div>
+          <div class="stat-val" id="stat-all-count">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">متوسط الصدقة</div>
+          <div class="stat-val" id="stat-avg">0.000 د.ك</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">عدد الدورات</div>
+          <div class="stat-val" id="stat-cycles-count">1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">توزيع الصدقات حسب الجهة</div>
+      <div id="charity-breakdown"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">أرشيف الدورات السابقة</div>
+      <div id="archive-list"></div>
+    </div>
+  </main>
+
+  <nav class="nav-bar no-print">
+    <button type="button" class="nav-item active" data-target="tab-donate">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>إخراج صدقة</span>
+    </button>
+    <button type="button" class="nav-item" data-target="tab-cycle">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+      <span>دورة جديدة</span>
+    </button>
+    <button type="button" class="nav-item" data-target="tab-stats">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>الإحصائيات</span>
+    </button>
+  </nav>
+  <script>
+    const STORAGE_KEY = 'sadagat_app_v2';
+    const todayStr = () => new Date().toISOString().split('T')[0];
+
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+      currentCycle: { startDate: todayStr(), budget: 0, donations: [] },
+      archive: []
+    };
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderAll();
     }
-  });
-}
 
-function getTodayStr() {
-  var d = new Date();
-  var y = d.getFullYear();
-  var m = String(d.getMonth() + 1).padStart(2, '0');
-  var day = String(d.getDate()).padStart(2, '0');
-  return y + '-' + m + '-' + day;
-}
-
-function parseCleanNumber(val) {
-  if (!val) return 0;
-  var s = String(val);
-  var out = '';
-  for (var i = 0; i < s.length; i++) {
-    var code = s.charCodeAt(i);
-    if (code >= 1632 && code <= 1641) {
-      out += String(code - 1632);
-    } else if (code >= 1776 && code <= 1785) {
-      out += String(code - 1776);
-    } else if (s.charAt(i) === '\u066B' || s.charAt(i) === '\u060C') {
-      out += '.';
-    } else {
-      out += s.charAt(i);
+    function parseNum(val) {
+      if (!val) return 0;
+      const clean = String(val)
+        .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+        .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+        .replace(/[^\d.]/g, '');
+      return parseFloat(clean) || 0;
     }
-  }
-  return parseFloat(out.replace(/[^0-9.-]/g, '')) || 0;
-}
 
-var saved = localStorage.getItem('sadaqatTrackerDataV4');
-var data = saved ? JSON.parse(saved) : {
-  carriedOver: 0,
-  baseBudget: 0,
-  startDate: getTodayStr(),
-  expenses: [],
-  archive: []
-};
+    function fmtKWD(num) {
+      return Number(num || 0).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + ' د.ك';
+    }
 
-document.getElementById('newStartDate').value = getTodayStr();
+    function fmtInt(num) {
+      return Number(num || 0).toLocaleString('en-US');
+    }
 
-function formatKWD(n) {
-  var r = Math.round(n * 1000) / 1000;
-  return r.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 }) + ' د.ك';
-}
+    function calcDuration(startStr) {
+      const start = new Date(startStr);
+      const now = new Date();
+      const diffDays = Math.max(0, Math.floor((now - start) / (1000 * 60 * 60 * 24)));
+      const months = Math.floor(diffDays / 30);
+      const days = diffDays % 30;
+      if (months > 0) return `${fmtInt(months)} شهر و ${fmtInt(days)} يوم`;
+      return `${fmtInt(days)} يوم`;
+    }
+    function renderAll() {
+      const cur = state.currentCycle;
+      const spent = cur.donations.reduce((s, d) => s + d.amount, 0);
+      const rem = cur.budget - spent;
 
-function saveData() {
-  localStorage.setItem('sadaqatTrackerDataV4', JSON.stringify(data));
-  render();
-}
+      document.getElementById('rem-balance').textContent = fmtKWD(rem);
+      document.getElementById('rollover-balance').textContent = fmtKWD(rem);
+      document.getElementById('total-cycle').textContent = fmtKWD(cur.budget);
+      document.getElementById('cycle-duration').textContent = calcDuration(cur.startDate);
+      document.getElementById('cycle-badge').textContent = `منذ ${cur.startDate}`;
 
-function calculateDuration(s, e) {
-  var st = new Date(s);
-  var en = new Date(e);
-  if (isNaN(st) || isNaN(en) || en < st) return '0 يوم';
-  var m = (en.getFullYear() - st.getFullYear()) * 12 + (en.getMonth() - st.getMonth());
-  var t = new Date(st);
-  t.setMonth(st.getMonth() + m);
-  if (t > en) {
-    m--;
-    t = new Date(st);
-    t.setMonth(st.getMonth() + m);
-  }
-  var d = Math.floor((en - t) / 86400000);
-  var p = [];
-  if (m > 0) p.push(m + ' شهر');
-  if (d > 0 || m === 0) p.push(d + ' يوم');
-  return p.join(' و ');
-}
+      const listEl = document.getElementById('current-list');
+      listEl.innerHTML = cur.donations.length ? '' : '<p style="text-align:center;color:#5A6470;font-size:0.9rem;">لا توجد عمليات مسجلة في هذه الدورة</p>';
+      cur.donations.slice().reverse().forEach((item, idx) => {
+        const realIdx = cur.donations.length - 1 - idx;
+        listEl.innerHTML += `
+          <div class="list-item">
+            <div class="item-info">
+              <h4>${item.charity} ${item.project ? `- ${item.project}` : ''}</h4>
+              <p>${item.date}</p>
+            </div>
+            <div class="item-actions">
+              <span class="amount-tag">${fmtKWD(item.amount)}</span>
+              <button type="button" class="del-btn" onclick="deleteDonation(${realIdx})">✕</button>
+            </div>
+          </div>`;
+      });
 
-function doSwitchTab(tabId) {
-  var tabs = ['donate', 'cycle', 'stats'];
-var last = getTodayStr();
-  if (tot > 0 || spent > 0) {
-    data.archive.unshift({
-      id: Date.now(),
-      startDate: data.startDate,
-      endDate: last,
-      totalAvailable: tot,
-      spent: spent,
-      remaining: rem,
-      duration: calculateDuration(data.startDate, last),
-      count: data.expenses.length,
-      expenses: data.expenses.slice()
+      const allDonations = [...state.archive.flatMap(c => c.donations), ...cur.donations];
+      const allTotal = allDonations.reduce((s, d) => s + d.amount, 0);
+      const allCount = allDonations.length;
+      document.getElementById('stat-all-total').textContent = fmtKWD(allTotal);
+      document.getElementById('stat-all-count').textContent = fmtInt(allCount);
+      document.getElementById('stat-avg').textContent = fmtKWD(allCount ? allTotal / allCount : 0);
+      document.getElementById('stat-cycles-count').textContent = fmtInt(state.archive.length + 1);
+
+      const byCharity = {};
+      allDonations.forEach(d => { byCharity[d.charity] = (byCharity[d.charity] || 0) + d.amount; });
+      const breakdownEl = document.getElementById('charity-breakdown');
+      const datalistEl = document.getElementById('charities-list');
+      breakdownEl.innerHTML = Object.keys(byCharity).length ? '' : '<p style="text-align:center;color:#5A6470;font-size:0.9rem;">لا توجد بيانات</p>';
+      datalistEl.innerHTML = '';
+      Object.entries(byCharity).sort((a, b) => b[1] - a[1]).forEach(([name, sum]) => {
+        datalistEl.innerHTML += `<option value="${name}">`;
+        const pct = allTotal ? ((sum / allTotal) * 100).toFixed(1) : '0.0';
+        breakdownEl.innerHTML += `
+          <div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:0.9rem;font-weight:700;">
+              <span>${name}</span>
+              <span style="direction:ltr;">${fmtKWD(sum)} (${pct}%)</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          </div>`;
+      });
+
+      const archEl = document.getElementById('archive-list');
+      archEl.innerHTML = state.archive.length ? '' : '<p style="text-align:center;color:#5A6470;font-size:0.9rem;">لا يوجد دورات سابقة</p>';
+      state.archive.slice().reverse().forEach(c => {
+        const cSpent = c.donations.reduce((s, d) => s + d.amount, 0);
+        archEl.innerHTML += `
+          <div class="list-item">
+            <div class="item-info"><h4>دورة ${c.startDate}</h4><p>المخصص: ${fmtKWD(c.budget)}</p></div>
+            <span class="amount-tag">المصروف: ${fmtKWD(cSpent)}</span>
+          </div>`;
+      });
+    }
+    window.deleteDonation = function(idx) {
+      if (confirm('هل تريد حذف هذه العملية؟')) {
+        state.currentCycle.donations.splice(idx, 1);
+        saveState();
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('inp-cycle-date').value = todayStr();
+
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById(btn.dataset.target).classList.add('active');
+        });
+      });
+
+      document.getElementById('btn-add-donation').addEventListener('click', () => {
+        const amount = parseNum(document.getElementById('inp-amount').value);
+        const charity = document.getElementById('inp-charity').value.trim();
+        const project = document.getElementById('inp-project').value.trim();
+        if (amount <= 0 || !charity) {
+          alert('يرجى إدخال مبلغ صحيح واسم الجهة الخيرية.');
+          return;
+        }
+        state.currentCycle.donations.push({ amount, charity, project, date: todayStr() });
+        document.getElementById('inp-amount').value = '';
+        document.getElementById('inp-charity').value = '';
+        document.getElementById('inp-project').value = '';
+        saveState();
+      });
+
+      document.getElementById('btn-start-cycle').addEventListener('click', () => {
+        const addedBudget = parseNum(document.getElementById('inp-new-budget').value);
+        const startDate = document.getElementById('inp-cycle-date').value || todayStr();
+        const spent = state.currentCycle.donations.reduce((s, d) => s + d.amount, 0);
+        const rem = Math.max(0, state.currentCycle.budget - spent);
+
+        if (state.currentCycle.budget > 0 || state.currentCycle.donations.length > 0) {
+          state.archive.push({ ...state.currentCycle });
+        }
+        state.currentCycle = { startDate, budget: rem + addedBudget, donations: [] };
+        document.getElementById('inp-new-budget').value = '';
+        saveState();
+        document.querySelector('[data-target="tab-donate"]').click();
+      });
+
+      document.getElementById('btn-reset-all').addEventListener('click', () => {
+        if (confirm('تحذير: سيتم مسح جميع الدورات والصدقات نهائياً. هل أنت متأكد؟')) {
+          localStorage.removeItem(STORAGE_KEY);
+          state = { currentCycle: { startDate: todayStr(), budget: 0, donations: [] }, archive: [] };
+          saveState();
+        }
+      });
+
+      document.getElementById('btn-export-pdf').addEventListener('click', () => {
+        window.print();
+      });
+
+      renderAll();
     });
-  }
-  data.carriedOver = rem;
-  data.baseBudget = newAmt;
-  data.startDate = newDate;
-  data.expenses = [];
-  document.getElementById('newBudgetAmount').value = '';
-  saveData();
-  alert('تم اعتماد الدورة الجديدة وترحيل (' + formatKWD(rem) + ')');
-  doSwitchTab('donate');
-}
-
-function doResetAll() {
-  if (confirm('هل أنت متأكد من مسح كافة البيانات؟')) {
-    data = { carriedOver: 0, baseBudget: 0, startDate: getTodayStr(), expenses: [], archive: [] };
-    saveData();
-  }
-}
-
-function doExportPDF() {
-  var element = document.getElementById('pdfArea');
-  var opt = {
-    margin: 10,
-    filename: 'تقرير-صدقات-' + getTodayStr() + '.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, backgroundColor: '#232A34' },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  if (typeof html2pdf !== 'undefined') {
-    html2pdf().set(opt).from(element).save();
-  } else {
-    window.print();
-  }
-}
-
-function render() {
-  var tot = data.baseBudget + data.carriedOver;
-  var spent = data.expenses.reduce(function(s, e) { return s + e.amount; }, 0);
-  var rem = tot - spent;
-  var remEl = document.getElementById('remainingDisplay');
-  remEl.textContent = formatKWD(rem);
-  remEl.style.color = rem >= 0 ? '#232A34' : '#D9534F';
-  document.getElementById('totalBudgetDisplay').textContent = formatKWD(tot);
-  document.getElementById('cycleCarryPreview').textContent = formatKWD(rem);
-  document.getElementById('headerStartDate').textContent = 'منذ ' + data.startDate;
-  var pct = tot > 0 ? Math.max(0, Math.min(100, (rem / tot) * 100)) : 0;
-  document.getElementById('progressBar').style.width = pct + '%';
-  var last = data.expenses.length > 0 ? data.expenses.slice(0, 1).pop().date : getTodayStr();
-  document.getElementById('durationDisplay').textContent = calculateDuration(data.startDate, last);
-
-  var listEl = document.getElementById('expensesList');
-  if (data.expenses.length === 0) {
-    listEl.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:12px 0;font-size:0.9rem">لا توجد صدقات مسجلة في هذه الدورة</div>';
-  } else {
-    listEl.innerHTML = data.expenses.map(function(e) {
-      return '<div class="list-item"><div><div style="font-weight:700;margin-bottom:4px">' +
-        '' + (e.entity || 'جهة عامة') + '</span>' +
-        '<span>' + (e.project || 'صدقة عامة') + '</span></div>' +
-        '<div style="font-size:0.78rem;color:var(--text-muted)">' + e.date + '</div></div>' +
-        '<div style="display:flex;align-items:center;gap:8px">' +
-        '<span style="font-weight:800;color:#15B87E">' + formatKWD(e.amount) + '</span>' +
-        '<button type="button" class="del-btn" onclick="doDeleteExpense(' + e.id + ')">حذف</button>' +
-        '</div></div>';
-    }).join('');
-  }
-
-  var pSpent = data.archive.reduce(function(s, a) { return s + a.spent; }, 0);
-  var pCount = data.archive.reduce(function(s, a) { return s + (a.count || 0); }, 0);
-  var gTot = pSpent + spent;
-  var tOps = pCount + data.expenses.length;
-  document.getElementById('grandTotalDisplay').textContent = formatKWD(gTot);
-  document.getElementById('totalCountDisplay').textContent = tOps.toLocaleString('en-US') + ' عملية';
-  document.getElementById('avgDonationDisplay').textContent = formatKWD(tOps > 0 ? gTot / tOps : 0);
-  document.getElementById('cyclesCountDisplay').textContent = (data.archive.length + 1).toLocaleString('en-US') + ' دورة';
-
-  var eMap = new Map();
-  var all = data.expenses.slice();
-  data.archive.forEach(function(a) {
-    if (a.expenses) a.expenses.forEach(function(x) { all.push(x); });
-  });
-  all.forEach(function(e) {
-    var k = e.entity || 'جهة عامة';
-    eMap.set(k, (eMap.get(k) || 0) + e.amount);
-  });
-  var keys = Array.from(eMap.keys()).sort(function(a, b) { return eMap.get(b) - eMap.get(a); });
-  var entEl = document.getElementById('entityStatsList');
-  if (keys.length === 0) {
-    entEl.innerHTML = '<div style="color:var(--text-muted);text-align:center;font-size:0.88rem">لا توجد بيانات بعد</div>';
-  } else {
-    entEl.innerHTML = keys.map(function(k) {
-      var v = eMap.get(k);
-      var sh = gTot > 0 ? Math.round((v / gTot) * 100) : 0;
-      return '' +
-        '<span>' + k + ' (' + sh.toLocaleString('en-US') + '%)</span>' +
-        '<span>' + formatKWD(v) + '</span></div>' +
-        '<div class="progress-wrap" style="margin-bottom:0;height:6px">' +
-        '<div class="progress-fill" style="width:' + sh + '%"></div></div></div>';
-    }).join('');
-  }
-
-  var arcEl = document.getElementById('archiveList');
-  if (data.archive.length === 0) {
-    arcEl.innerHTML = '<div style="color:var(--text-muted);text-align:center;font-size:0.88rem">لا توجد دورات سابقة</div>';
-  } else {
-    arcEl.innerHTML = data.archive.map(function(a) {
-      return '<div class="archive-item"><div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px;color:#232A34">' +
-        '<span>من ' + a.startDate + ' إلى ' + a.endDate + '</span>' +
-        '<span style="color:#15B87E">' + formatKWD(a.spent) + '</span></div>' +
-        '<div style="font-size:0.82rem;color:var(--text-muted);display:flex;justify-content:space-between">' +
-        '<span>المدة: ' + a.duration + ' (' + Number(a.count).toLocaleString('en-US') + ' عمليات)</span>' +
-        '<span>المُرحّل: ' + formatKWD(a.remaining) + '</span></div></div>';
-    }).join('');
-  }
-}
-
-render();
-</script>
+  </script>
 </body>
 </html>
