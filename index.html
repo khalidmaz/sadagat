@@ -261,6 +261,7 @@
         <span>الإحصائيات</span>
     </button>
 </nav>
+
 <script>
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
@@ -377,8 +378,7 @@
         document.getElementById('printDate').textContent = 'تاريخ استخراج التقرير: ' + new Date().toLocaleDateString('ar-KW');
         window.print();
     }
-
-        function render() {
+    function render() {
         const totalAvailable = data.baseBudget + data.carriedOver;
         const totalSpent = data.expenses.reduce((sum, e) => sum + e.amount, 0);
         const remaining = totalAvailable - totalSpent;
@@ -494,4 +494,3 @@
 </script>
 </body>
 </html>
-
