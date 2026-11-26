@@ -92,17 +92,14 @@
         .print-header { display: none; }
     </style>
 </head>
-
 <body>
 
 <div class="container">
-    <!-- Print Only Header -->
     <div class="print-header">
         <h1 style="margin:0; color:#232A34;">تقرير إحصائيات الصدقات</h1>
         <p id="printDate" style="margin:5px 0 0; color:#555; font-size:0.9rem;"></p>
     </div>
 
-    <!-- App Header -->
     <div class="app-header no-print">
         <div class="app-title">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1FE6A0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
@@ -111,7 +108,6 @@
         <div class="badge-accent" id="headerStartDate">دورة نشطة</div>
     </div>
 
-    <!-- TAB 1: إخراج صدقة -->
     <div id="tab-donate" class="tab-section active">
         <div class="card hero-card">
             <div class="balance-label">المتبقي في رصيد الصدقات</div>
@@ -141,8 +137,8 @@
                 <span>تسجيل صدقة جديدة</span>
             </div>
             
-            <label>المبلغ (د.ك)</label>
-            <input type="number" id="expenseAmount" placeholder="0.000" step="0.001">
+            <label>المبلغ (د.ك) - يدعم الأرقام العربية والإنجليزية</label>
+            <input type="text" inputmode="decimal" id="expenseAmount" placeholder="0.000">
             
             <label>الجهة الخيرية أو المستفيد</label>
             <input type="text" id="expenseEntity" placeholder="مثلاً: العون المباشر، بيت الزكاة، أسرة متعففة">
@@ -181,7 +177,7 @@
             </div>
 
             <label>المبلغ الجديد المخصص (د.ك)</label>
-            <input type="number" id="newBudgetAmount" placeholder="0.000" step="0.001">
+            <input type="text" inputmode="decimal" id="newBudgetAmount" placeholder="0.000">
             
             <label>تاريخ بداية الدورة</label>
             <input type="date" id="newStartDate">
@@ -261,13 +257,28 @@
         <span>الإحصائيات</span>
     </button>
 </nav>
-
 <script>
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
     }
 
-    const todayStr = new Date().toISOString().split('T');
+    function getTodayStr() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
+
+    // تحويل الأرقام العربية والهندية إلى أرقام إنجليزية
+    function parseCleanNumber(val) {
+        if (!val) return 0;
+        const map = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9','٫':'.','،':'.'};
+        const cleaned = String(val).replace(/[٠-٩۰-۹٫،]/g, m => map[m]).replace(/[^\d.-]/g, '');
+        return parseFloat(cleaned) || 0;
+    }
+
+    const todayStr = getTodayStr();
 
     let data = JSON.parse(localStorage.getItem('sadaqatTrackerDataV4')) || 
                JSON.parse(localStorage.getItem('sadaqatTrackerDataV3')) || 
@@ -302,7 +313,7 @@
     function calculateDuration(startStr, endStr) {
         let start = new Date(startStr);
         let end = new Date(endStr);
-        if (end < start) return "0 يوم";
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return "0 يوم";
 
         let months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
         let tempDate = new Date(start);
@@ -322,22 +333,22 @@
     }
 
     function addExpense() {
-        const amt = parseFloat(document.getElementById('expenseAmount').value);
+        const amt = parseCleanNumber(document.getElementById('expenseAmount').value);
         const entity = document.getElementById('expenseEntity').value.trim() || 'جهة عامة';
         const project = document.getElementById('expenseProject').value.trim() || 'صدقة عامة';
-const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toISOString().split('T');
+const lastDate = data.expenses.length > 0 ? data.expenses.at(0).date : getTodayStr();
         saveData();
     }
 
     function startNewCycle() {
-        const newAmt = parseFloat(document.getElementById('newBudgetAmount').value) || 0;
+        const newAmt = parseCleanNumber(document.getElementById('newBudgetAmount').value);
         const newDate = document.getElementById('newStartDate').value;
         if (!newDate) return alert('اختر تاريخ البداية');
 
         const totalAvailable = data.baseBudget + data.carriedOver;
         const totalSpent = data.expenses.reduce((sum, e) => sum + e.amount, 0);
         const remaining = totalAvailable - totalSpent;
-        const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toISOString().split('T');
+const lastDate = data.expenses.length > 0 ? data.expenses.at(0).date : getTodayStr();
         const duration = calculateDuration(data.startDate, lastDate);
 
         if (totalAvailable > 0 || totalSpent > 0) {
@@ -367,7 +378,7 @@ const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toIS
 
     function resetAll() {
         if (confirm('تحذير: سيتم مسح الدورة الحالية وجميع الدورات المؤرشفة. هل أنت متأكد؟')) {
-            data = { carriedOver: 0, baseBudget: 0, startDate: new Date().toISOString().split('T'), expenses: [], archive: [] };
+            data = { carriedOver: 0, baseBudget: 0, startDate: getTodayStr(), expenses: [], archive: [] };
             localStorage.removeItem('sadaqatTrackerDataV3');
             localStorage.removeItem('sadaqatTrackerDataV2');
             saveData();
@@ -375,7 +386,7 @@ const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toIS
     }
 
     function exportPDF() {
-        document.getElementById('printDate').textContent = 'تاريخ استخراج التقرير: ' + new Date().toLocaleDateString('ar-KW');
+        document.getElementById('printDate').textContent = 'تاريخ استخراج التقرير: ' + getTodayStr();
         window.print();
     }
     function render() {
@@ -383,7 +394,6 @@ const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toIS
         const totalSpent = data.expenses.reduce((sum, e) => sum + e.amount, 0);
         const remaining = totalAvailable - totalSpent;
 
-        // تحديث البطاقة الرئيسية
         const remEl = document.getElementById('remainingDisplay');
         remEl.textContent = formatKWD(remaining);
         remEl.style.color = remaining >= 0 ? '#232A34' : '#D9534F';
@@ -392,14 +402,12 @@ const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toIS
         document.getElementById('cycleCarryPreview').textContent = formatKWD(remaining);
         document.getElementById('headerStartDate').textContent = `منذ ${data.startDate}`;
 
-        // شريط التقدم
         let pct = totalAvailable > 0 ? Math.max(0, Math.min(100, (remaining / totalAvailable) * 100)) : 0;
         document.getElementById('progressBar').style.width = pct + '%';
 
-        const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toISOString().split('T');
+        const lastDate = data.expenses.length > 0 ? data.expenses.date : getTodayStr();
         document.getElementById('durationDisplay').textContent = calculateDuration(data.startDate, lastDate);
 
-        // سجل العمليات الحالية
         const listEl = document.getElementById('expensesList');
         if (data.expenses.length === 0) {
             listEl.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:12px 0; font-size:0.9rem;">لا توجد صدقات مسجلة في هذه الدورة</div>';
@@ -427,7 +435,6 @@ const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toIS
             }).join('');
         }
 
-        // حساب الإحصائيات الشاملة
         const pastSpent = data.archive.reduce((sum, a) => sum + a.spent, 0);
         const pastCount = data.archive.reduce((sum, a) => sum + (a.count || 0), 0);
         const grandTotal = pastSpent + totalSpent;
@@ -435,11 +442,10 @@ const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toIS
         const avgDonation = totalOps > 0 ? (grandTotal / totalOps) : 0;
 
         document.getElementById('grandTotalDisplay').textContent = formatKWD(grandTotal);
-        document.getElementById('totalCountDisplay').textContent = totalOps + ' عملية';
+        document.getElementById('totalCountDisplay').textContent = totalOps.toLocaleString('en-US') + ' عملية';
         document.getElementById('avgDonationDisplay').textContent = formatKWD(avgDonation);
-        document.getElementById('cyclesCountDisplay').textContent = (data.archive.length + 1) + ' دورة';
+        document.getElementById('cyclesCountDisplay').textContent = (data.archive.length + 1).toLocaleString('en-US') + ' دورة';
 
-        // إحصائيات الجهات الخيرية
         const entityMap = {};
         const allExpenses = [...data.expenses];
         data.archive.forEach(a => { if (a.expenses) allExpenses.push(...a.expenses); });
@@ -459,7 +465,7 @@ const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toIS
                 return `
                     
                         
-                            <span>${entName} (${share}%)</span>
+                            <span>${entName} (${share.toLocaleString('en-US')}%)</span>
                             <span>${formatKWD(sum)}</span>
                         </div>
                         <div class="progress-wrap" style="margin-bottom:0; height:6px;">
@@ -470,7 +476,6 @@ const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toIS
             }).join('');
         }
 
-        // أرشيف الدورات
         const archiveEl = document.getElementById('archiveList');
         if (data.archive.length === 0) {
             archiveEl.innerHTML = '<div style="color:var(--text-muted); text-align:center; font-size:0.88rem;">لا توجد دورات سابقة مؤرشفة بعد</div>';
@@ -482,7 +487,7 @@ const lastDate = data.expenses.length > 0 ? data.expenses.date : new Date().toIS
                         <span style="color:#15B87E;">${formatKWD(a.spent)}</span>
                     </div>
                     <div style="font-size:0.82rem; color:var(--text-muted); display:flex; justify-content:space-between;">
-                        <span>المدة: ${a.duration} (${a.count} عمليات)</span>
+                        <span>المدة: ${a.duration} (${Number(a.count).toLocaleString('en-US')} عمليات)</span>
                         <span>المُرحّل: ${formatKWD(a.remaining)}</span>
                     </div>
                 </div>
