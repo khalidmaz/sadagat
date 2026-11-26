@@ -349,7 +349,7 @@ const lastDate = data.expenses.length > 0 ? data.expenses.at(0).date : getTodayS
         const totalSpent = data.expenses.reduce((sum, e) => sum + e.amount, 0);
         const remaining = totalAvailable - totalSpent;
 const lastDate = data.expenses.length > 0 ? data.expenses.at(0).date : getTodayStr();
-        const duration = calculateDuration(data.startDate, lastDate);
+        const duration = calculateDuration(data.startDate, lastDate);7
 
         if (totalAvailable > 0 || totalSpent > 0) {
             data.archive.unshift({
