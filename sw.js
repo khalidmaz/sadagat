@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sadaqat-pwa-v7';
+const CACHE_NAME = 'sadaqat-pwa-v8';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
