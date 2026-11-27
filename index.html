@@ -7,12 +7,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#232A34" />
   <title>مِيزَان الصَّدَقَات | KWD</title>
-  <link rel="icon" type="image/png" href=“icon-v2.png” />
-  <link rel="apple-touch-icon" href=“icon-v2.png” />
+  <link rel="icon" type="image/png" href="icon-v2.png" />
+  <link rel="apple-touch-icon" href="icon-v2.png" />
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://googleapis.com" />
   <link rel="preconnect" href="https://gstatic.com" crossorigin />
   <link href="https://googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <script src="html2pdf.bundle.min.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(regs) {
@@ -307,7 +308,19 @@
 <body>
   <header class="app-header">
     <div class="brand">
-      <img src=“icon-v2.png”" alt="شعار التطبيق" />
+      <div style="width:44px; height:44px; border-radius:12px; background:#1B2129; border:1.5px solid #1FE6A0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <svg width="32" height="32" viewBox="0 0 100 100" fill="none" stroke="#1FE6A0" stroke-width="3.2" stroke-linecap="round">
+          <g transform="translate(50,50)">
+            <g transform="rotate(0)"><line x1="0" y1="0" x2="0" y2="-40"/><path d="M-6,-14 L0,-20 L6,-14 M-6,-24 L0,-30 L6,-24 M-5,-34 L0,-39 L5,-34"/></g>
+            <g transform="rotate(51.4)"><line x1="0" y1="0" x2="0" y2="-40"/><path d="M-6,-14 L0,-20 L6,-14 M-6,-24 L0,-30 L6,-24 M-5,-34 L0,-39 L5,-34"/></g>
+            <g transform="rotate(102.8)"><line x1="0" y1="0" x2="0" y2="-40"/><path d="M-6,-14 L0,-20 L6,-14 M-6,-24 L0,-30 L6,-24 M-5,-34 L0,-39 L5,-34"/></g>
+            <g transform="rotate(154.2)"><line x1="0" y1="0" x2="0" y2="-40"/><path d="M-6,-14 L0,-20 L6,-14 M-6,-24 L0,-30 L6,-24 M-5,-34 L0,-39 L5,-34"/></g>
+            <g transform="rotate(205.7)"><line x1="0" y1="0" x2="0" y2="-40"/><path d="M-6,-14 L0,-20 L6,-14 M-6,-24 L0,-30 L6,-24 M-5,-34 L0,-39 L5,-34"/></g>
+            <g transform="rotate(257.1)"><line x1="0" y1="0" x2="0" y2="-40"/><path d="M-6,-14 L0,-20 L6,-14 M-6,-24 L0,-30 L6,-24 M-5,-34 L0,-39 L5,-34"/></g>
+            <g transform="rotate(308.5)"><line x1="0" y1="0" x2="0" y2="-40"/><path d="M-6,-14 L0,-20 L6,-14 M-6,-24 L0,-30 L6,-24 M-5,-34 L0,-39 L5,-34"/></g>
+          </g>
+        </svg>
+      </div>
       <div>
         <div class="brand-title">مِيزَان الصَّدَقَات</div>
         <div class="brand-sub">إدارة وتتبع الصدقات (KWD)</div>
