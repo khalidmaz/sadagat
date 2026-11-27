@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -10,9 +11,9 @@
   <link rel="icon" type="image/png" href="icon-v2.png" />
   <link rel="apple-touch-icon" href="icon-v2.png" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="preconnect" href="https://googleapis.com" />
-  <link rel="preconnect" href="https://gstatic.com" crossorigin />
-  <link href="https://googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(regs) {
@@ -181,7 +182,6 @@
       min-height: 46px;
       text-align: right;
     }
-
 
 
     input:focus, select:focus {
@@ -530,7 +530,7 @@
       return `${days} يوم`;
     }
 
-    function getCurrentSpent() {
+        function getCurrentSpent() {
       return state.currentCycle.transactions.reduce((sum, t) => sum + t.amount, 0);
     }
     function getCurrentRemaining() {
@@ -593,20 +593,20 @@
         byCharity[t.charity].total += t.amount;
         byCharity[t.charity].projects[t.project] = (byCharity[t.charity].projects[t.project] || 0) + t.amount;
       });
-      const sortedCharities = Object.entries(byCharity).sort((a, b) => b.total - a.total);
+      const sortedCharities = Object.entries(byCharity).sort((a, b) => b.at(1).total - a.at(1).total);
       const barsEl = document.getElementById('charity-bars');
       const breakdownEl = document.getElementById('charity-projects-breakdown');
       if (sortedCharities.length === 0) {
         barsEl.innerHTML = '<div class="empty-msg">لا توجد بيانات لعرض الرسم البياني.</div>';
         breakdownEl.innerHTML = '<div class="empty-msg">لا توجد مشاريع مسجلة بعد.</div>';
       } else {
-        const maxVal = sortedCharities.total || 1;
+        const maxVal = sortedCharities.at(0).at(1).total || 1;
         barsEl.innerHTML = sortedCharities.map(([name, data]) => {
           const pct = Math.round((data.total / maxVal) * 100);
           return `<div class="bar-row"><div class="bar-header"><span>${name}</span><span style="direction:ltr;">${formatKWD(data.total)} KWD</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div></div>`;
         }).join('');
         breakdownEl.innerHTML = sortedCharities.map(([name, data]) => {
-          const projLines = Object.entries(data.projects).sort((a, b) => b - a).map(([pName, pVal]) => {
+          const projLines = Object.entries(data.projects).sort((a, b) => b.at(1) - a.at(1)).map(([pName, pVal]) => {
             const pPct = data.total > 0 ? ((pVal / data.total) * 100).toFixed(1) : '0.0';
             return `<div class="project-line"><span>${pName}</span><span style="direction:ltr;">${formatKWD(pVal)} KWD (${pPct}%)</span></div>`;
           }).join('');
@@ -614,7 +614,7 @@
         }).join('');
       }
 
-      const archiveEl = document.getElementById('archive-list');
+            const archiveEl = document.getElementById('archive-list');
       const toolbarEl = document.getElementById('archive-toolbar');
       if (state.archive.length === 0) {
         toolbarEl.style.display = 'none';
@@ -628,58 +628,70 @@
       }
     }
     function downloadTextAsPDF(title, lines, filename) {
-      const canvas = document.createElement('canvas');
-      const W = 1240, H = 1754;
-      canvas.width = W; canvas.height = H;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = '#232A34'; ctx.fillRect(0, 0, W, 130);
-      ctx.fillStyle = '#1FE6A0'; ctx.font = 'bold 42px Tajawal, sans-serif'; ctx.textAlign = 'right';
-      ctx.fillText(title, W - 60, 82);
-      ctx.fillStyle = '#E8E1D5'; ctx.font = '26px Tajawal, sans-serif'; ctx.textAlign = 'left';
-      ctx.fillText(getTodayISO(), 60, 80);
-      let y = 200;
+      const W = 1240, H = 1754, pageData = [];
+      let cv = null, ctx = null, y = 0;
+      const finishPage = () => {
+        ctx.fillStyle = '#5A626D'; ctx.font = '22px Tajawal, sans-serif'; ctx.textAlign = 'center'; ctx.direction = 'ltr';
+        ctx.fillText(String(pageData.length + 1), W / 2, H - 40);
+        pageData.push(cv.toDataURL('image/jpeg', 0.92));
+      };
+      const newPage = () => {
+        if (cv) finishPage();
+        cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+        ctx = cv.getContext('2d');
+        ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#232A34'; ctx.fillRect(0, 0, W, 130);
+        ctx.fillStyle = '#1FE6A0'; ctx.font = 'bold 42px Tajawal, sans-serif'; ctx.textAlign = 'right'; ctx.direction = 'rtl';
+        ctx.fillText(title, W - 60, 82);
+        ctx.fillStyle = '#E8E1D5'; ctx.font = '26px Tajawal, sans-serif'; ctx.textAlign = 'left'; ctx.direction = 'ltr';
+        ctx.fillText(getTodayISO(), 60, 80);
+        y = 200;
+      };
+      newPage();
       lines.forEach(line => {
-        if (y > H - 80) return;
+        if (y > H - 100) newPage();
         if (line.header) {
           ctx.fillStyle = '#E8E1D5'; ctx.fillRect(50, y - 34, W - 100, 48);
-          ctx.fillStyle = '#1D232B'; ctx.font = 'bold 26px Tajawal, sans-serif'; ctx.textAlign = 'right';
+          ctx.fillStyle = '#1D232B'; ctx.font = 'bold 26px Tajawal, sans-serif'; ctx.textAlign = 'right'; ctx.direction = 'rtl';
           ctx.fillText(line.text, W - 70, y);
           y += 58;
         } else {
-          ctx.fillStyle = '#1D232B'; ctx.font = '25px Tajawal, sans-serif'; ctx.textAlign = 'right';
+          ctx.fillStyle = '#1D232B'; ctx.font = '25px Tajawal, sans-serif'; ctx.textAlign = 'right'; ctx.direction = 'rtl';
           ctx.fillText(line.right, W - 70, y);
-          if (line.left) { ctx.textAlign = 'left'; ctx.fillStyle = '#0D8A5E'; ctx.fillText(line.left, 70, y); }
+          if (line.left) { ctx.textAlign = 'left'; ctx.direction = 'ltr'; ctx.fillStyle = '#0D8A5E'; ctx.fillText(line.left, 70, y); }
           ctx.strokeStyle = '#E5E7EB'; ctx.beginPath(); ctx.moveTo(60, y + 14); ctx.lineTo(W - 60, y + 14); ctx.stroke();
           y += 46;
         }
       });
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      const bin = atob(imgData.split(','));
-      const imgLen = bin.length;
-      const pdfParts = [
-        '%PDF-1.3\n',
-        '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n',
-        '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n',
-        '3 0 obj << /Type /Page /Parent 2 0 R /Resources << /XObject << /Im0 4 0 R >> >> /MediaBox [0 0 595 842] /Contents 5 0 R >> endobj\n',
-        `4 0 obj << /Type /XObject /Subtype /Image /Width ${W} /Height ${H} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imgLen} >> stream\n`
-      ];
+      finishPage();
 
-                  const endPart = '\nendstream\nendobj\n5 0 obj << /Length 44 >> stream\nq 595 0 0 842 0 0 cm /Im0 Do Q\nendstream\nendobj\n';
-      const headBytes = new TextEncoder().encode(pdfParts.join(''));
-      const imgBytes = new Uint8Array(imgLen);
-      for (let i = 0; i < imgLen; i++) imgBytes[i] = bin.charCodeAt(i);
-      const tailBytes = new TextEncoder().encode(endPart);
-      const o1 = 9;
-      const o2 = o1 + pdfParts.at(1).length;
-      const o3 = o2 + pdfParts.at(2).length;
-      const o4 = o3 + pdfParts.at(3).length;
-      const o5 = o4 + pdfParts.at(4).length + imgLen + 18;
-      const xrefPos = headBytes.length + imgBytes.length + tailBytes.length;
-      const xref = `xref\n0 6\n0000000000 65535 f \n${String(o1).padStart(10,'0')} 00000 n \n${String(o2).padStart(10,'0')} 00000 n \n${String(o3).padStart(10,'0')} 00000 n \n${String(o4).padStart(10,'0')} 00000 n \n${String(o5).padStart(10,'0')} 00000 n \ntrailer << /Size 6 /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
-      const blob = new Blob([headBytes, imgBytes, tailBytes, new TextEncoder().encode(xref)], { type: 'application/pdf' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename;
+                        const chunks = [], offs = [];
+      let pos = 0;
+      const put = d => { const b = typeof d === 'string' ? new TextEncoder().encode(d) : d; chunks.push(b); pos += b.length; };
+      const obj = (n, body) => { offs[n] = pos; put(`${n} 0 obj\n${body}\nendobj\n`); };
+      put('%PDF-1.4\n');
+      obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+      obj(2, `<< /Type /Pages /Kids [${pageData.map((_, i) => `${3 + 3 * i} 0 R`).join(' ')}] /Count ${pageData.length} >>`);
+      pageData.forEach((url, i) => {
+        const bin = atob(url.split(',').pop());
+        const img = new Uint8Array(bin.length);
+        for (let k = 0; k < bin.length; k++) img[k] = bin.charCodeAt(k);
+        const n = 3 + 3 * i, content = 'q 595 0 0 842 0 0 cm /Im0 Do Q';
+        obj(n, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im0 ${n + 1} 0 R >> >> /Contents ${n + 2} 0 R >>`);
+        offs[n + 1] = pos;
+        put(`${n + 1} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${W} /Height ${H} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.length} >>\nstream\n`);
+        put(img); put('\nendstream\nendobj\n');
+        obj(n + 2, `<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+      });
+      const total = 3 + 3 * pageData.length, xrefPos = pos;
+      let xref = `xref\n0 ${total}\n0000000000 65535 f \n`;
+      for (let n = 1; n < total; n++) xref += `${String(offs.at(n)).padStart(10, '0')} 00000 n \n`;
+      put(`${xref}trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF\n`);
+      const blob = new Blob(chunks, { type: 'application/pdf' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = filename;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 60000);
     }
     window.viewArchiveDetails = async function(idx) {
       const c = state.archive.at(idx);
@@ -689,6 +701,9 @@
     };
     window.printArchiveIndices = function(indices) {
       const lines = [];
+      const grand = indices.reduce((s, idx) => s + state.archive.at(idx).transactions.reduce((q, t) => q + t.amount, 0), 0);
+      lines.push({ header: true, text: `ملخص التقرير | عدد الدورات: ${indices.length}` });
+      lines.push({ right: 'مجموع الصدقات الإجمالي للدورات المحددة', left: `${formatKWD(grand)} KWD` });
       indices.forEach(idx => {
         const c = state.archive.at(idx);
         const spent = c.transactions.reduce((s, t) => s + t.amount, 0);
@@ -781,7 +796,7 @@
       saveState(); this.reset(); renderAll();
     });
 
-                document.getElementById('topup-form').addEventListener('submit', async function(e) {
+                    document.getElementById('topup-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const addAmt = parseArabicNumber(document.getElementById('topup-amount').value);
       if (isNaN(addAmt) || addAmt <= 0) { await showPopup('تنبيه', 'يرجى إدخال مبلغ صحيح أكبر من الصفر.'); return; }
@@ -814,7 +829,7 @@
     document.getElementById('btn-export-backup').addEventListener('click', triggerBackupDownload);
     document.getElementById('btn-import-backup').addEventListener('click', () => document.getElementById('backup-file-input').click());
     document.getElementById('backup-file-input').addEventListener('change', function(e) {
-      const file = e.target.files;
+      const file = e.target.files.item(0);
       if (!file) return;
       const reader = new FileReader();
       reader.onload = async function(ev) {
@@ -830,6 +845,7 @@
       reader.readAsText(file);
       this.value = '';
     });
+
     document.getElementById('btn-export-csv').addEventListener('click', async function() {
       const rows = [['الدورة', 'التاريخ', 'الجهة الخيرية', 'المشروع', 'المبلغ (KWD)']];
       state.archive.forEach((c, i) => c.transactions.forEach(t => rows.push([`دورة #${i + 1}`, t.date, t.charity, t.project, formatKWD(t.amount)])));
@@ -872,6 +888,7 @@
         btn.classList.add('active'); document.getElementById(btn.dataset.target).classList.add('active');
       });
     });
+
     async function checkScheduledBackup() {
       const freq = state.backupSettings.freq;
       if (!freq || freq === 'off') return;
