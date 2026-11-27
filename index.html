@@ -665,13 +665,16 @@
         `4 0 obj << /Type /XObject /Subtype /Image /Width ${W} /Height ${H} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imgLen} >> stream\n`
       ];
 
-            const endPart = '\nendstream\nendobj\n5 0 obj << /Length 44 >> stream\nq 595 0 0 842 0 0 cm /Im0 Do Q\nendstream\nendobj\n';
+                  const endPart = '\nendstream\nendobj\n5 0 obj << /Length 44 >> stream\nq 595 0 0 842 0 0 cm /Im0 Do Q\nendstream\nendobj\n';
       const headBytes = new TextEncoder().encode(pdfParts.join(''));
       const imgBytes = new Uint8Array(imgLen);
       for (let i = 0; i < imgLen; i++) imgBytes[i] = bin.charCodeAt(i);
       const tailBytes = new TextEncoder().encode(endPart);
-      const o1 = 9, o2 = o1 + pdfParts.length, o3 = o2 + pdfParts.length, o4 = o3 + pdfParts.length;
-      const o5 = o4 + pdfParts.length + imgLen + 18;
+      const o1 = 9;
+      const o2 = o1 + pdfParts.at(1).length;
+      const o3 = o2 + pdfParts.at(2).length;
+      const o4 = o3 + pdfParts.at(3).length;
+      const o5 = o4 + pdfParts.at(4).length + imgLen + 18;
       const xrefPos = headBytes.length + imgBytes.length + tailBytes.length;
       const xref = `xref\n0 6\n0000000000 65535 f \n${String(o1).padStart(10,'0')} 00000 n \n${String(o2).padStart(10,'0')} 00000 n \n${String(o3).padStart(10,'0')} 00000 n \n${String(o4).padStart(10,'0')} 00000 n \n${String(o5).padStart(10,'0')} 00000 n \ntrailer << /Size 6 /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
       const blob = new Blob([headBytes, imgBytes, tailBytes, new TextEncoder().encode(xref)], { type: 'application/pdf' });
@@ -679,15 +682,15 @@
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
     window.viewArchiveDetails = async function(idx) {
-      const c = state.archive[idx];
+      const c = state.archive.at(idx);
       const spent = c.transactions.reduce((s, t) => s + t.amount, 0);
-      const list = c.transactions.length ? c.transactions.map(t => `• ${t.charity} (${t.project}): ${formatKWD(t.amount)} KWD [${t.date}]`).join('\n') : 'لا توجد عمليات مسجلة.';
+      const list = c.transactions.length ? c.transactions.map(t => `• ${t.charity} (${t.project}): ${formatKWD(t.amount)} KWD (${t.date})`).join('\n') : 'لا توجد عمليات مسجلة.';
       await showPopup(`تفاصيل دورة #${(idx + 1).toLocaleString('en-US')}`, `الفترة: ${c.startDate} إلى ${c.endDate}\nالميزانية: ${formatKWD(c.budget)} KWD | المصروف: ${formatKWD(spent)} KWD\n\nالعمليات:\n${list}`);
     };
     window.printArchiveIndices = function(indices) {
       const lines = [];
       indices.forEach(idx => {
-        const c = state.archive[idx];
+        const c = state.archive.at(idx);
         const spent = c.transactions.reduce((s, t) => s + t.amount, 0);
         const rem = c.budget - spent;
         lines.push({ header: true, text: `دورة #${idx + 1} (${c.startDate} إلى ${c.endDate})` });
