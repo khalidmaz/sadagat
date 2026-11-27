@@ -614,7 +614,7 @@
         }).join('');
       }
 
-                                    const archiveEl = document.getElementById('archive-list');
+      const archiveEl = document.getElementById('archive-list');
       const toolbarEl = document.getElementById('archive-toolbar');
       if (state.archive.length === 0) {
         toolbarEl.style.display = 'none';
@@ -643,7 +643,7 @@
         if (y > H - 80) return;
         if (line.header) {
           ctx.fillStyle = '#E8E1D5'; ctx.fillRect(50, y - 34, W - 100, 48);
-          ctx.fillStyle = '#1D232B'; ctx.font = 'bold 28px Tajawal, sans-serif'; ctx.textAlign = 'right';
+          ctx.fillStyle = '#1D232B'; ctx.font = 'bold 26px Tajawal, sans-serif'; ctx.textAlign = 'right';
           ctx.fillText(line.text, W - 70, y);
           y += 58;
         } else {
@@ -655,7 +655,7 @@
         }
       });
       const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      const bin = atob(imgData.split(',')[1]);
+      const bin = atob(imgData.split(','));
       const imgLen = bin.length;
       const pdfParts = [
         '%PDF-1.3\n',
@@ -665,13 +665,13 @@
         `4 0 obj << /Type /XObject /Subtype /Image /Width ${W} /Height ${H} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imgLen} >> stream\n`
       ];
 
-      const endPart = '\nendstream\nendobj\n5 0 obj << /Length 44 >> stream\nq 595 0 0 842 0 0 cm /Im0 Do Q\nendstream\nendobj\n';
+            const endPart = '\nendstream\nendobj\n5 0 obj << /Length 44 >> stream\nq 595 0 0 842 0 0 cm /Im0 Do Q\nendstream\nendobj\n';
       const headBytes = new TextEncoder().encode(pdfParts.join(''));
       const imgBytes = new Uint8Array(imgLen);
       for (let i = 0; i < imgLen; i++) imgBytes[i] = bin.charCodeAt(i);
       const tailBytes = new TextEncoder().encode(endPart);
-      const o1 = 9, o2 = o1 + pdfParts[1].length, o3 = o2 + pdfParts[2].length, o4 = o3 + pdfParts[3].length;
-      const o5 = o4 + pdfParts[4].length + imgLen + 18;
+      const o1 = 9, o2 = o1 + pdfParts.length, o3 = o2 + pdfParts.length, o4 = o3 + pdfParts.length;
+      const o5 = o4 + pdfParts.length + imgLen + 18;
       const xrefPos = headBytes.length + imgBytes.length + tailBytes.length;
       const xref = `xref\n0 6\n0000000000 65535 f \n${String(o1).padStart(10,'0')} 00000 n \n${String(o2).padStart(10,'0')} 00000 n \n${String(o3).padStart(10,'0')} 00000 n \n${String(o4).padStart(10,'0')} 00000 n \n${String(o5).padStart(10,'0')} 00000 n \ntrailer << /Size 6 /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
       const blob = new Blob([headBytes, imgBytes, tailBytes, new TextEncoder().encode(xref)], { type: 'application/pdf' });
@@ -689,10 +689,14 @@
       indices.forEach(idx => {
         const c = state.archive[idx];
         const spent = c.transactions.reduce((s, t) => s + t.amount, 0);
-        lines.push({ header: true, text: `دورة #${idx + 1} (${c.startDate} إلى ${c.endDate}) | المصروف: ${formatKWD(spent)} KWD` });
+        const rem = c.budget - spent;
+        lines.push({ header: true, text: `دورة #${idx + 1} (${c.startDate} إلى ${c.endDate})` });
+        lines.push({ right: 'رصيد البداية (الميزانية)', left: `${formatKWD(c.budget)} KWD` });
+        lines.push({ right: 'مجموع الصدقات المصروفة', left: `${formatKWD(spent)} KWD` });
+        lines.push({ right: 'الرصيد المتبقي عند الإغلاق', left: `${formatKWD(rem)} KWD` });
         c.transactions.forEach(t => lines.push({ right: `${t.charity} — ${t.project} (${t.date})`, left: `${formatKWD(t.amount)} KWD` }));
       });
-      downloadTextAsPDF('تقرير أرشيف الصدقات', lines, `sadaqah-archive-${getTodayISO()}.pdf`);
+      downloadTextAsPDF('تقرير أرشيف صدقات الوالد', lines, `sadaqah-archive-${getTodayISO()}.pdf`);
     };
     window.toggleSelectAllArchive = function() {
       const checks = Array.from(document.querySelectorAll('.arch-check'));
@@ -774,7 +778,7 @@
       saveState(); this.reset(); renderAll();
     });
 
-            document.getElementById('topup-form').addEventListener('submit', async function(e) {
+                document.getElementById('topup-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const addAmt = parseArabicNumber(document.getElementById('topup-amount').value);
       if (isNaN(addAmt) || addAmt <= 0) { await showPopup('تنبيه', 'يرجى إدخال مبلغ صحيح أكبر من الصفر.'); return; }
@@ -842,13 +846,21 @@
     });
     document.getElementById('btn-print-pdf').addEventListener('click', async function() {
       const allTx = [...state.currentCycle.transactions, ...state.archive.flatMap(c => c.transactions)];
-      if (allTx.length === 0) { await showPopup('تنبيه', 'لا توجد عمليات مسجلة لتصديرها.'); return; }
-      const total = allTx.reduce((s, t) => s + t.amount, 0);
+      if (allTx.length === 0 && state.currentCycle.budget === 0) { await showPopup('تنبيه', 'لا توجد بيانات مسجلة لتصديرها.'); return; }
+      const totalAll = allTx.reduce((s, t) => s + t.amount, 0);
+      const curSpent = getCurrentSpent();
+      const curRem = getCurrentRemaining();
       const lines = [
-        { header: true, text: `ملخص الإحصائيات | الإجمالي: ${formatKWD(total)} KWD | العمليات: ${allTx.length}` },
+        { header: true, text: `ملخص الدورة الحالية (من ${state.currentCycle.startDate})` },
+        { right: 'المبلغ الذي بدأنا به (إجمالي الدورة الحالية)', left: `${formatKWD(state.currentCycle.budget)} KWD` },
+        { right: 'المبلغ المصروف في الدورة الحالية', left: `${formatKWD(curSpent)} KWD` },
+        { right: 'المبلغ المتبقي الذي وصلنا له حالياً', left: `${formatKWD(curRem)} KWD` },
+        { header: true, text: `الإحصائيات الشاملة | عدد العمليات: ${allTx.length}` },
+        { right: 'مجموع الصدقات الإجمالي لكافة الفترات', left: `${formatKWD(totalAll)} KWD` },
+        { header: true, text: 'سجل العمليات التفصيلي' },
         ...allTx.slice().reverse().map(t => ({ right: `${t.charity} — ${t.project} (${t.date})`, left: `${formatKWD(t.amount)} KWD` }))
       ];
-      downloadTextAsPDF('تقرير مِيزَان الصَّدَقَات الشامل', lines, `sadaqah-stats-${getTodayISO()}.pdf`);
+      downloadTextAsPDF('تقرير صدقات الوالد الشامل', lines, `sadaqah-stats-${getTodayISO()}.pdf`);
     });
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
