@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#232A34" />
-  <title>مِيزَان الصَّدَقَات | KWD</title>
+  <title>صدقات الوالد | KWD</title>
   <link rel="icon" type="image/png" href="icon-v2.png" />
   <link rel="apple-touch-icon" href="icon-v2.png" />
   <link rel="manifest" href="manifest.json" />
@@ -321,7 +321,7 @@
         </svg>
       </div>
       <div>
-        <div class="brand-title">مِيزَان الصَّدَقَات</div>
+        <div class="brand-title">صدقات الوالد</div>
         <div class="brand-sub">إدارة وتتبع الصدقات (KWD)</div>
       </div>
     </div>
@@ -614,7 +614,7 @@
         }).join('');
       }
 
-                              const archiveEl = document.getElementById('archive-list');
+                                    const archiveEl = document.getElementById('archive-list');
       const toolbarEl = document.getElementById('archive-toolbar');
       if (state.archive.length === 0) {
         toolbarEl.style.display = 'none';
@@ -627,13 +627,56 @@
         }).join('');
       }
     }
-    function buildArchiveReportHTML(indices) {
-      return indices.map(idx => {
-        const c = state.archive[idx];
-        const spent = c.transactions.reduce((s, t) => s + t.amount, 0);
-        const rows = c.transactions.length === 0 ? '<div class="empty-msg">لا توجد عمليات مسجلة.</div>' : c.transactions.map(t => `<div class="project-line"><span>${t.charity} (${t.project}) — <small style="direction:ltr; display:inline-block;">${t.date}</small></span><strong style="direction:ltr;">${formatKWD(t.amount)} KWD</strong></div>`).join('');
-        return `<div class="card" style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:6px;"><span>تقرير دورة #${(idx + 1).toLocaleString('en-US')}</span><span style="direction:ltr;">${c.startDate} → ${c.endDate}</span></div><div style="font-size:0.85rem; margin-bottom:8px;">الميزانية: <strong style="direction:ltr; display:inline-block;">${formatKWD(c.budget)}</strong> KWD | المصروف: <strong style="direction:ltr; display:inline-block;">${formatKWD(spent)}</strong> KWD | العمليات: ${c.transactions.length.toLocaleString('en-US')}</div>${rows}</div>`;
-      }).join('');
+    function downloadTextAsPDF(title, lines, filename) {
+      const canvas = document.createElement('canvas');
+      const W = 1240, H = 1754;
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#232A34'; ctx.fillRect(0, 0, W, 130);
+      ctx.fillStyle = '#1FE6A0'; ctx.font = 'bold 42px Tajawal, sans-serif'; ctx.textAlign = 'right';
+      ctx.fillText(title, W - 60, 82);
+      ctx.fillStyle = '#E8E1D5'; ctx.font = '26px Tajawal, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(getTodayISO(), 60, 80);
+      let y = 200;
+      lines.forEach(line => {
+        if (y > H - 80) return;
+        if (line.header) {
+          ctx.fillStyle = '#E8E1D5'; ctx.fillRect(50, y - 34, W - 100, 48);
+          ctx.fillStyle = '#1D232B'; ctx.font = 'bold 28px Tajawal, sans-serif'; ctx.textAlign = 'right';
+          ctx.fillText(line.text, W - 70, y);
+          y += 58;
+        } else {
+          ctx.fillStyle = '#1D232B'; ctx.font = '25px Tajawal, sans-serif'; ctx.textAlign = 'right';
+          ctx.fillText(line.right, W - 70, y);
+          if (line.left) { ctx.textAlign = 'left'; ctx.fillStyle = '#0D8A5E'; ctx.fillText(line.left, 70, y); }
+          ctx.strokeStyle = '#E5E7EB'; ctx.beginPath(); ctx.moveTo(60, y + 14); ctx.lineTo(W - 60, y + 14); ctx.stroke();
+          y += 46;
+        }
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const bin = atob(imgData.split(',')[1]);
+      const imgLen = bin.length;
+      const pdfParts = [
+        '%PDF-1.3\n',
+        '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n',
+        '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n',
+        '3 0 obj << /Type /Page /Parent 2 0 R /Resources << /XObject << /Im0 4 0 R >> >> /MediaBox [0 0 595 842] /Contents 5 0 R >> endobj\n',
+        `4 0 obj << /Type /XObject /Subtype /Image /Width ${W} /Height ${H} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imgLen} >> stream\n`
+      ];
+
+      const endPart = '\nendstream\nendobj\n5 0 obj << /Length 44 >> stream\nq 595 0 0 842 0 0 cm /Im0 Do Q\nendstream\nendobj\n';
+      const headBytes = new TextEncoder().encode(pdfParts.join(''));
+      const imgBytes = new Uint8Array(imgLen);
+      for (let i = 0; i < imgLen; i++) imgBytes[i] = bin.charCodeAt(i);
+      const tailBytes = new TextEncoder().encode(endPart);
+      const o1 = 9, o2 = o1 + pdfParts[1].length, o3 = o2 + pdfParts[2].length, o4 = o3 + pdfParts[3].length;
+      const o5 = o4 + pdfParts[4].length + imgLen + 18;
+      const xrefPos = headBytes.length + imgBytes.length + tailBytes.length;
+      const xref = `xref\n0 6\n0000000000 65535 f \n${String(o1).padStart(10,'0')} 00000 n \n${String(o2).padStart(10,'0')} 00000 n \n${String(o3).padStart(10,'0')} 00000 n \n${String(o4).padStart(10,'0')} 00000 n \n${String(o5).padStart(10,'0')} 00000 n \ntrailer << /Size 6 /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
+      const blob = new Blob([headBytes, imgBytes, tailBytes, new TextEncoder().encode(xref)], { type: 'application/pdf' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
     window.viewArchiveDetails = async function(idx) {
       const c = state.archive[idx];
@@ -642,10 +685,14 @@
       await showPopup(`تفاصيل دورة #${(idx + 1).toLocaleString('en-US')}`, `الفترة: ${c.startDate} إلى ${c.endDate}\nالميزانية: ${formatKWD(c.budget)} KWD | المصروف: ${formatKWD(spent)} KWD\n\nالعمليات:\n${list}`);
     };
     window.printArchiveIndices = function(indices) {
-      document.getElementById('archive-print-area').innerHTML = buildArchiveReportHTML(indices);
-      document.body.classList.add('print-archive-mode');
-      window.print();
-      setTimeout(() => { document.body.classList.remove('print-archive-mode'); }, 300);
+      const lines = [];
+      indices.forEach(idx => {
+        const c = state.archive[idx];
+        const spent = c.transactions.reduce((s, t) => s + t.amount, 0);
+        lines.push({ header: true, text: `دورة #${idx + 1} (${c.startDate} إلى ${c.endDate}) | المصروف: ${formatKWD(spent)} KWD` });
+        c.transactions.forEach(t => lines.push({ right: `${t.charity} — ${t.project} (${t.date})`, left: `${formatKWD(t.amount)} KWD` }));
+      });
+      downloadTextAsPDF('تقرير أرشيف الصدقات', lines, `sadaqah-archive-${getTodayISO()}.pdf`);
     };
     window.toggleSelectAllArchive = function() {
       const checks = Array.from(document.querySelectorAll('.arch-check'));
@@ -667,6 +714,7 @@
       if (!(await showPopup('مسح الدورات المحددة', `سيتم حذف (${selected.length.toLocaleString('en-US')}) دورات نهائياً من الأرشيف. هل أنت متأكد؟`, true, true))) return;
       state.archive = state.archive.filter((_, i) => !selected.includes(i)); saveState(); renderAll();
     };
+
     function showPopup(title, msg, isConfirm = false, isDanger = false) {
       return new Promise(resolve => {
         const overlay = document.getElementById('custom-modal');
@@ -705,8 +753,7 @@
       if (tx) { tx.amount = amount; tx.charity = charity; tx.project = project; }
       saveState(); document.getElementById('edit-modal').classList.remove('show'); renderAll();
     });
-
-        window.deleteTx = async function(id) {
+    window.deleteTx = async function(id) {
       if (!(await showPopup('حذف العملية', 'هل تريد حذف هذه الصدقة من السجل؟', true, true))) return;
       state.currentCycle.transactions = state.currentCycle.transactions.filter(t => t.id !== id);
       saveState(); renderAll();
@@ -726,7 +773,8 @@
       state.currentCycle.transactions.push({ id: Date.now().toString(36), amount, charity, project, date: getTodayISO() });
       saveState(); this.reset(); renderAll();
     });
-    document.getElementById('topup-form').addEventListener('submit', async function(e) {
+
+            document.getElementById('topup-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const addAmt = parseArabicNumber(document.getElementById('topup-amount').value);
       if (isNaN(addAmt) || addAmt <= 0) { await showPopup('تنبيه', 'يرجى إدخال مبلغ صحيح أكبر من الصفر.'); return; }
@@ -759,7 +807,7 @@
     document.getElementById('btn-export-backup').addEventListener('click', triggerBackupDownload);
     document.getElementById('btn-import-backup').addEventListener('click', () => document.getElementById('backup-file-input').click());
     document.getElementById('backup-file-input').addEventListener('change', function(e) {
-      const file = e.target.files[0];
+      const file = e.target.files;
       if (!file) return;
       const reader = new FileReader();
       reader.onload = async function(ev) {
@@ -792,9 +840,15 @@
       state = { currentCycle: { budget: 0, startDate: getTodayISO(), transactions: [] }, archive: [], backupSettings: { freq: 'weekly', lastBackup: '' } };
       saveState(); renderAll();
     });
-    document.getElementById('btn-print-pdf').addEventListener('click', function() {
-      document.body.classList.remove('print-archive-mode');
-      window.print();
+    document.getElementById('btn-print-pdf').addEventListener('click', async function() {
+      const allTx = [...state.currentCycle.transactions, ...state.archive.flatMap(c => c.transactions)];
+      if (allTx.length === 0) { await showPopup('تنبيه', 'لا توجد عمليات مسجلة لتصديرها.'); return; }
+      const total = allTx.reduce((s, t) => s + t.amount, 0);
+      const lines = [
+        { header: true, text: `ملخص الإحصائيات | الإجمالي: ${formatKWD(total)} KWD | العمليات: ${allTx.length}` },
+        ...allTx.slice().reverse().map(t => ({ right: `${t.charity} — ${t.project} (${t.date})`, left: `${formatKWD(t.amount)} KWD` }))
+      ];
+      downloadTextAsPDF('تقرير مِيزَان الصَّدَقَات الشامل', lines, `sadaqah-stats-${getTodayISO()}.pdf`);
     });
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
