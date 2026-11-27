@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://googleapis.com" />
   <link rel="preconnect" href="https://gstatic.com" crossorigin />
   <link href="https://googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cloudflare.com"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(regs) {
@@ -602,7 +603,7 @@
         }).join('');
       }
 
-                        const archiveEl = document.getElementById('archive-list');
+      const archiveEl = document.getElementById('archive-list');
       const toolbarEl = document.getElementById('archive-toolbar');
       if (state.archive.length === 0) {
         toolbarEl.style.display = 'none';
@@ -620,8 +621,19 @@
         const c = state.archive[idx];
         const spent = c.transactions.reduce((s, t) => s + t.amount, 0);
         const rows = c.transactions.length === 0 ? '<div class="empty-msg">لا توجد عمليات مسجلة.</div>' : c.transactions.map(t => `<div class="project-line"><span>${t.charity} (${t.project}) — <small style="direction:ltr; display:inline-block;">${t.date}</small></span><strong style="direction:ltr;">${formatKWD(t.amount)} KWD</strong></div>`).join('');
-        return `<div class="card" style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:6px;"><span>تقرير دورة #${(idx + 1).toLocaleString('en-US')}</span><span style="direction:ltr;">${c.startDate} → ${c.endDate}</span></div><div style="font-size:0.85rem; margin-bottom:8px;">الميزانية: <strong style="direction:ltr; display:inline-block;">${formatKWD(c.budget)}</strong> KWD | المصروف: <strong style="direction:ltr; display:inline-block;">${formatKWD(spent)}</strong> KWD | العمليات: ${c.transactions.length.toLocaleString('en-US')}</div>${rows}</div>`;
+        return `<div class="card" style="margin-bottom:12px; border:1px solid #ccc;"><div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:6px;"><span>تقرير دورة #${(idx + 1).toLocaleString('en-US')}</span><span style="direction:ltr;">${c.startDate} → ${c.endDate}</span></div><div style="font-size:0.85rem; margin-bottom:8px;">الميزانية: <strong style="direction:ltr; display:inline-block;">${formatKWD(c.budget)}</strong> KWD | المصروف: <strong style="direction:ltr; display:inline-block;">${formatKWD(spent)}</strong> KWD | العمليات: ${c.transactions.length.toLocaleString('en-US')}</div>${rows}</div>`;
       }).join('');
+    }
+    async function generateDirectPDF(htmlContent, filename) {
+      if (typeof html2pdf === 'undefined') { await showPopup('تنبيه', 'يرجى التأكد من الاتصال بالإنترنت لتحميل أداة التصدير.'); return; }
+      const wrapper = document.createElement('div');
+      wrapper.dir = 'rtl';
+      wrapper.style.cssText = 'padding:16px; background:#FFFFFF; color:#1D232B; font-family:Tajawal,sans-serif; width:100%;';
+      wrapper.innerHTML = `<h2 style="text-align:center; margin-bottom:14px; color:#232A34;">مِيزَان الصَّدَقَات | ${getTodayISO()}</h2>` + htmlContent;
+      document.body.appendChild(wrapper);
+      try {
+        await html2pdf().set({ margin: 10, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(wrapper).save();
+      } finally { document.body.removeChild(wrapper); }
     }
     window.viewArchiveDetails = async function(idx) {
       const c = state.archive[idx];
@@ -629,10 +641,8 @@
       const list = c.transactions.length ? c.transactions.map(t => `• ${t.charity} (${t.project}): ${formatKWD(t.amount)} KWD [${t.date}]`).join('\n') : 'لا توجد عمليات مسجلة.';
       await showPopup(`تفاصيل دورة #${(idx + 1).toLocaleString('en-US')}`, `الفترة: ${c.startDate} إلى ${c.endDate}\nالميزانية: ${formatKWD(c.budget)} KWD | المصروف: ${formatKWD(spent)} KWD\n\nالعمليات:\n${list}`);
     };
-    window.printArchiveIndices = function(indices) {
-      document.getElementById('archive-print-area').innerHTML = buildArchiveReportHTML(indices);
-      document.body.classList.add('print-archive-mode');
-      setTimeout(() => { window.print(); document.body.classList.remove('print-archive-mode'); }, 150);
+    window.printArchiveIndices = async function(indices) {
+      await generateDirectPDF(buildArchiveReportHTML(indices), `sadaqah-archive-${getTodayISO()}.pdf`);
     };
     window.toggleSelectAllArchive = function() {
       const checks = Array.from(document.querySelectorAll('.arch-check'));
@@ -642,7 +652,7 @@
     window.exportSelectedArchive = async function() {
       const selected = Array.from(document.querySelectorAll('.arch-check:checked')).map(ch => Number(ch.value));
       if (selected.length === 0) { await showPopup('تنبيه', 'يرجى تحديد دورة واحدة على الأقل للتصدير.'); return; }
-      printArchiveIndices(selected);
+      await printArchiveIndices(selected);
     };
     window.deleteSingleArchive = async function(idx) {
       if (!(await showPopup('حذف الدورة', `هل تريد حذف دورة #${(idx + 1).toLocaleString('en-US')} من الأرشيف نهائياً؟`, true, true))) return;
@@ -693,7 +703,7 @@
       saveState(); document.getElementById('edit-modal').classList.remove('show'); renderAll();
     });
 
-    window.deleteTx = async function(id) {
+        window.deleteTx = async function(id) {
       if (!(await showPopup('حذف العملية', 'هل تريد حذف هذه الصدقة من السجل؟', true, true))) return;
       state.currentCycle.transactions = state.currentCycle.transactions.filter(t => t.id !== id);
       saveState(); renderAll();
@@ -746,7 +756,7 @@
     document.getElementById('btn-export-backup').addEventListener('click', triggerBackupDownload);
     document.getElementById('btn-import-backup').addEventListener('click', () => document.getElementById('backup-file-input').click());
     document.getElementById('backup-file-input').addEventListener('change', function(e) {
-      const file = e.target.files[0];
+      const file = e.target.files;
       if (!file) return;
       const reader = new FileReader();
       reader.onload = async function(ev) {
@@ -779,7 +789,11 @@
       state = { currentCycle: { budget: 0, startDate: getTodayISO(), transactions: [] }, archive: [], backupSettings: { freq: 'weekly', lastBackup: '' } };
       saveState(); renderAll();
     });
-    document.getElementById('btn-print-pdf').addEventListener('click', function() { document.body.classList.remove('print-archive-mode'); setTimeout(() => { window.print(); }, 150); });
+    document.getElementById('btn-print-pdf').addEventListener('click', async function() {
+      const statsClone = document.getElementById('tab-stats').cloneNode(true);
+      statsClone.querySelectorAll('.no-print').forEach(el => el.remove());
+      await generateDirectPDF(statsClone.innerHTML, `sadaqah-stats-${getTodayISO()}.pdf`);
+    });
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
