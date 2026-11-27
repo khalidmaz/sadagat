@@ -13,7 +13,6 @@
   <link rel="preconnect" href="https://googleapis.com" />
   <link rel="preconnect" href="https://gstatic.com" crossorigin />
   <link href="https://googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
-  <script src="html2pdf.bundle.min.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(regs) {
@@ -615,7 +614,7 @@
         }).join('');
       }
 
-                        const archiveEl = document.getElementById('archive-list');
+                              const archiveEl = document.getElementById('archive-list');
       const toolbarEl = document.getElementById('archive-toolbar');
       if (state.archive.length === 0) {
         toolbarEl.style.display = 'none';
@@ -645,7 +644,8 @@
     window.printArchiveIndices = function(indices) {
       document.getElementById('archive-print-area').innerHTML = buildArchiveReportHTML(indices);
       document.body.classList.add('print-archive-mode');
-      setTimeout(() => { window.print(); document.body.classList.remove('print-archive-mode'); }, 150);
+      window.print();
+      setTimeout(() => { document.body.classList.remove('print-archive-mode'); }, 300);
     };
     window.toggleSelectAllArchive = function() {
       const checks = Array.from(document.querySelectorAll('.arch-check'));
@@ -706,7 +706,7 @@
       saveState(); document.getElementById('edit-modal').classList.remove('show'); renderAll();
     });
 
-    window.deleteTx = async function(id) {
+        window.deleteTx = async function(id) {
       if (!(await showPopup('حذف العملية', 'هل تريد حذف هذه الصدقة من السجل؟', true, true))) return;
       state.currentCycle.transactions = state.currentCycle.transactions.filter(t => t.id !== id);
       saveState(); renderAll();
@@ -792,7 +792,10 @@
       state = { currentCycle: { budget: 0, startDate: getTodayISO(), transactions: [] }, archive: [], backupSettings: { freq: 'weekly', lastBackup: '' } };
       saveState(); renderAll();
     });
-    document.getElementById('btn-print-pdf').addEventListener('click', function() { document.body.classList.remove('print-archive-mode'); setTimeout(() => { window.print(); }, 150); });
+    document.getElementById('btn-print-pdf').addEventListener('click', function() {
+      document.body.classList.remove('print-archive-mode');
+      window.print();
+    });
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
